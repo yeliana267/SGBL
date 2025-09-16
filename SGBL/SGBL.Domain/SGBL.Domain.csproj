@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Folder Include="Base\" />
+    <Folder Include="Entities\Rafael\" />
     <Folder Include="Entities\users\" />
     <Folder Include="Prueba\" />
     <Folder Include="Repository\" />
