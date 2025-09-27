@@ -1,3 +1,4 @@
+using SGBL.Persistence.Context;
 namespace SGBL.Web
 {
     public class Program
@@ -6,11 +7,15 @@ namespace SGBL.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var config = builder.Configuration;
+            var connectionString = config.GetConnectionString("SupabaseConnection");
+            var dbService = new pruebaConexion(connectionString);
+            dbService.ProbarConexion();
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-
             var app = builder.Build();
-
+            
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {

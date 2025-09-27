@@ -1,7 +1,8 @@
-﻿namespace SGBL.Persistence
+﻿
+namespace SGBL.Persistence
 {
     public class Persistence
     {
-
+     
     }
 }
