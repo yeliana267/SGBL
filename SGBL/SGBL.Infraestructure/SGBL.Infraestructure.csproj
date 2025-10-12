@@ -10,4 +10,9 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SGBL.Application\SGBL.Application.csproj" />
+    <ProjectReference Include="..\SGBL.Domain\SGBL.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

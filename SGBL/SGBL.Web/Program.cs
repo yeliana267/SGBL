@@ -1,3 +1,5 @@
+using SGBL.Application;
+using SGBL.Persistence;
 using SGBL.Persistence.Context;
 namespace SGBL.Web
 {
@@ -11,6 +13,10 @@ namespace SGBL.Web
             var connectionString = config.GetConnectionString("SupabaseConnection");
             var dbService = new pruebaConexion(connectionString);
             dbService.ProbarConexion();
+            
+            
+            builder.Services.AddPersistenceLayerIoc(builder.Configuration);
+            builder.Services.AddApplicationLayerIoc();
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
