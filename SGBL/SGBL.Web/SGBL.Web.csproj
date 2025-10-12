@@ -14,6 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SGBL.Application\SGBL.Application.csproj" />
+    <ProjectReference Include="..\SGBL.Domain\SGBL.Domain.csproj" />
+    <ProjectReference Include="..\SGBL.Infraestructure\SGBL.Infraestructure.csproj" />
     <ProjectReference Include="..\SGBL.Persistence\SGBL.Persistence.csproj" />
   </ItemGroup>
 

@@ -1,0 +1,20 @@
+﻿
+
+using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using SGBL.Application.Interfaces;
+using SGBL.Application.Services;
+
+namespace SGBL.Application
+{
+    public static class ServiceRegistration
+    {
+        public static void AddApplicationLayerIoc(this IServiceCollection services)
+        {
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddScoped<IBookService, BookService>();
+        }
+
+    }
+}
+
