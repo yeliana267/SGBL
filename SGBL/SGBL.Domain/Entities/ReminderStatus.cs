@@ -6,7 +6,7 @@ using SGBL.Domain.Base;
 
 namespace SGBL.Domain.Entities
 {
-    [Table("recordatorios_libros")]
+    [Table("recordatorio_estados")]
     public class ReminderStatus: BaseEntity<int>
     {
         [Column("idestado")]

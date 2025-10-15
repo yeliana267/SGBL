@@ -16,22 +16,36 @@ namespace SGBL.Persistence
             var connectionString = config.GetConnectionString("SupabaseConnection");
 
             services.AddDbContext<SGBLContext>(
-                (serviceProvider, opt) =>
-                {
-                    if (config.GetValue<bool>("EnableSensitiveDataLogging"))
-                        opt.EnableSensitiveDataLogging();
+    (sp, opt) =>
+    {
+        if (config.GetValue<bool>("EnableSensitiveDataLogging"))
+            opt.EnableSensitiveDataLogging();
 
-                    opt.UseNpgsql(connectionString, m =>
-                        m.MigrationsAssembly(typeof(SGBLContext).Assembly.FullName));
-                },
-                contextLifetime: ServiceLifetime.Scoped,
-                optionsLifetime: ServiceLifetime.Scoped
+        var cs = config.GetConnectionString("SupabaseConnection");
+
+        opt.UseNpgsql(cs, npgsql =>
+        {
+            // Reintentos ante fallos transitorios de red
+            npgsql.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorCodesToAdd: null
             );
+
+            // Más tiempo para consultas (lectura inicial en Supabase puede ser lenta)
+            npgsql.CommandTimeout(60);
+        });
+    },
+    contextLifetime: ServiceLifetime.Scoped,
+    optionsLifetime: ServiceLifetime.Scoped
+);
             #endregion
 
             #region IoC
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IBookRepository, BookRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<INationalityRepository, NationalityRepository>();
             #endregion
         }
     }

@@ -5,6 +5,7 @@ using SGBL.Domain.Base;
 
 namespace SGBL.Domain.Entities
 {
+
     [Table("roles")]
     public class Role: BaseEntity<int>
     {

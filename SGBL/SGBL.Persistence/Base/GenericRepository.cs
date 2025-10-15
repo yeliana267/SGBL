@@ -1,33 +1,39 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SGBL.Domain.Interfaces;
 using SGBL.Persistence.Context;
 
 namespace SGBL.Persistence.Base
 {
-    public class GenericRepository<Entity> : IGenericRepository<Entity> where Entity : class
+    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
     {
         private readonly SGBLContext _context;
+        private readonly DbSet<TEntity> _dbSet;
+
         public GenericRepository(SGBLContext context)
         {
             _context = context;
+            _dbSet = _context.Set<TEntity>();
+            // Si quieres forzar split query global en este repo:
+            // _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
-        public virtual async Task<Entity> AddAsync(Entity entity)
+
+        public virtual async Task<TEntity> AddAsync(TEntity entity)
         {
-            await _context.Set<Entity>().AddAsync(entity);
+            await _dbSet.AddAsync(entity);
             await _context.SaveChangesAsync();
             return entity;
         }
-        public virtual async Task<List<Entity>?> AddRangeAsync(List<Entity> entities)
+
+        public virtual async Task<List<TEntity>?> AddRangeAsync(List<TEntity> entities)
         {
-            await _context.Set<Entity>().AddRangeAsync(entities);
+            await _dbSet.AddRangeAsync(entities);
             await _context.SaveChangesAsync();
             return entities;
         }
 
-        public virtual async Task<Entity?> UpdateAsync(int id, Entity entity)
+        public virtual async Task<TEntity?> UpdateAsync(int id, TEntity entity)
         {
-            var entry = await _context.Set<Entity>().FindAsync(id);
+            var entry = await _dbSet.FindAsync(id);
 
             if (entry != null)
             {
@@ -35,52 +41,82 @@ namespace SGBL.Persistence.Base
                 await _context.SaveChangesAsync();
                 return entry;
             }
-
             return null;
         }
+
         public virtual async Task DeleteAsync(int id)
         {
-            var entity = await _context.Set<Entity>().FindAsync(id);
-
+            var entity = await _dbSet.FindAsync(id);
             if (entity != null)
             {
-                _context.Set<Entity>().Remove(entity);
+                _dbSet.Remove(entity);
                 await _context.SaveChangesAsync();
             }
         }
 
-        public virtual async Task<Entity?> GetById(int id)
+        public virtual async Task<TEntity?> GetById(int id)
         {
-            return await _context.Set<Entity>().FindAsync(id);
+            // Si es lectura pura y no vas a modificar, puedes usar AsNoTracking
+            // return await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => /* filtra por id */);
+            return await _dbSet.FindAsync(id);
         }
 
-        public virtual async Task<List<Entity>> GetAllAsync()
+        public virtual async Task<List<TEntity>> GetAllAsync()
         {
-            return await _context.Set<Entity>().ToListAsync();
+            // ⚠️ Aquí es donde te daba timeout: usa AsNoTracking para aligerar
+            return await _dbSet
+                .AsNoTracking()
+                .ToListAsync();
         }
 
-        public virtual async Task<List<Entity>> GetAllAsyncWithInclude(List<string> properties)
+        public virtual async Task<List<TEntity>> GetAllAsyncWithInclude(List<string> properties)
         {
-            var query = _context.Set<Entity>().AsQueryable();
+            // ⚠️ Importante: reasignar el query al llamar Include
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+
             foreach (var property in properties)
-            {
-                query.Include(property);
-            }
+                query = query.Include(property);
+
+            // (Opcional) Si incluyes varias colecciones, puedes dividir la consulta:
+            // query = query.AsSplitQuery();
+
             return await query.ToListAsync();
         }
 
-        public virtual IQueryable<Entity> GetAllQueryWithInclude(List<string> properties)
+        public virtual IQueryable<TEntity> GetAllQueryWithInclude(List<string> properties)
         {
-            var query = _context.Set<Entity>().AsQueryable();
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
             foreach (var property in properties)
-            {
-                query.Include(property);
-            }
+                query = query.Include(property);
+
+            // (Opcional) .AsSplitQuery()
             return query;
         }
-        public virtual IQueryable<Entity> GetAllQuery()
+
+        public virtual IQueryable<TEntity> GetAllQuery()
         {
-            return _context.Set<Entity>().AsQueryable();
+            return _dbSet.AsNoTracking();
         }
+
+        // ✅ Útil si luego quieres paginar
+        public virtual async Task<List<TEntity>> GetPageAsync(int page, int pageSize)
+        {
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 20;
+
+            return await _dbSet
+                .AsNoTracking()
+                .OrderBy(e => 1) // Reemplaza por .OrderBy(e => e.Id) si lo tienes
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+        // en GenericRepository<TEntity>
+        public async Task<TEntity?> GetByIdNoTrackingAsync(int id)
+        {
+            return await _dbSet.AsNoTracking()
+                .FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
+        }
+
     }
 }

@@ -13,6 +13,8 @@ namespace SGBL.Application
         {
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddScoped<IBookService, BookService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<INationalityService, NationalityService>();
         }
 
     }

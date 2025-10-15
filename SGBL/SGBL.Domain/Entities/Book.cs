@@ -11,7 +11,7 @@ namespace SGBL.Domain.Entities
         [Column("idlibro")]
         [Key]
         public override int Id { get; set; }
-        [Column("idlibro")]
+        [Column("titulo")]
         public string Title { get; set; }
         [Column("isbn")]
         public int Isbn { get; set; }

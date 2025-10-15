@@ -1,0 +1,39 @@
+﻿@model List<SGBL.Application.ViewModels.RoleViewModel>
+@{
+    ViewData["Title"] = "Listado de Roles";
+}
+
+<h2 class="mt-3">Roles</h2>
+
+@if (TempData["ok"] != null)
+{
+    <div class="alert alert-success">@TempData["ok"]</div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">➕ Nuevo Rol</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var role in Model)
+        {
+            <tr>
+                <td>@role.Id</td>
+                <td>@role.Name</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@role.Id" class="btn btn-warning btn-sm">Editar</a>
+                    <a asp-action="Details" asp-route-id="@role.Id" class="btn btn-info btn-sm">Ver</a>
+                    <a asp-action="Delete" asp-route-id="@role.Id" class="btn btn-danger btn-sm">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

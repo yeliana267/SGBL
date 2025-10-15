@@ -12,5 +12,6 @@ namespace SGBL.Domain.Interfaces
         IQueryable<Entity> GetAllQuery();
         Task<Entity?> GetById(int id);
         Task<Entity?> UpdateAsync(int id, Entity entity);
+        Task <Entity> GetByIdNoTrackingAsync(int id);
     }
 }
