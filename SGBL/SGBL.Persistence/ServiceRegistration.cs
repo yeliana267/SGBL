@@ -46,6 +46,8 @@ namespace SGBL.Persistence
             services.AddScoped<IBookRepository, BookRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<INationalityRepository, NationalityRepository>();
+            services.AddScoped<IUserStatusRepository, UserStatusRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             #endregion
         }
     }

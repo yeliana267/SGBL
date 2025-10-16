@@ -12,9 +12,17 @@ namespace SGBL.Application.Services
         private readonly IGenericRepository<TEntity> _repository;
         private readonly IMapper _mapper;
 
+        public IUserStatusService UserStatusService { get; }
+
         public GenericService(IGenericRepository<TEntity> repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
+        }
+
+        public GenericService(IUserStatusService userStatusService, IMapper mapper)
+        {
+            UserStatusService = userStatusService;
             _mapper = mapper;
         }
 

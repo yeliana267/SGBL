@@ -1,19 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
-using SGBL.Application.Dtos.Role;
+using SGBL.Application.Dtos.User;
 using SGBL.Application.Interfaces;
+using SGBL.Application.Services;
 using SGBL.Application.ViewModels;
 using System.Diagnostics;
 
 namespace SGBL.Web.Controllers
 {
-    public class RolesController : Controller
+    public class UserStatusController : Controller
     {
-            private readonly IRoleService _roles;
+        private readonly IUserStatusService _userStatusService;
 
-            public RolesController(IRoleService roles)
+            public UserStatusController(IUserStatusService userStatusService)
             {
-                _roles = roles;
+                _userStatusService = userStatusService;
             }
 
         // LISTADO
@@ -21,7 +22,7 @@ namespace SGBL.Web.Controllers
         [OutputCache(Duration = 30)]
         public async Task<IActionResult> Index()
         {
-            var dtos = await _roles.GetAll(); // ya AsNoTracking en repo
+            var dtos = await _userStatusService.GetAll(); // ya AsNoTracking en repo
             var vms = dtos.Select(MapToVm).ToList();
             return View(vms);
         }
@@ -29,29 +30,29 @@ namespace SGBL.Web.Controllers
 
         // DETALLE
         public async Task<IActionResult> Details(int id)
-            {
-                var dto = await _roles.GetById(id);
-                if (dto is null) return NotFound();
-                return View(MapToVm(dto));
-            }
+        {
+            var dto = await _userStatusService.GetById(id);
+            if (dto is null) return NotFound();
+            return View(MapToVm(dto));
+        }
 
             // CREAR (GET)
             public IActionResult Create()
             {
-                return View(new RoleViewModel());
+                return View(new UserStatusViewModel());
             }
 
             // CREAR (POST)
             [HttpPost]
             [ValidateAntiForgeryToken]
-            public async Task<IActionResult> Create(RoleViewModel vm)
+            public async Task<IActionResult> Create(UserStatusViewModel vm)
             {
                 if (!ModelState.IsValid) return View(vm);
 
                 try
                 {
-                    var created = await _roles.AddAsync(MapToDto(vm));
-                    TempData["ok"] = $"Rol '{created?.Name}' creado correctamente.";
+                    var created = await _userStatusService.AddAsync(MapToDto(vm));
+                    TempData["ok"] = $"Estado de usuario '{created?.Name}' creado correctamente.";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (InvalidOperationException ex)
@@ -60,13 +61,14 @@ namespace SGBL.Web.Controllers
                     return View(vm);
                 }
             }
+        
 
         // EDITAR (GET)
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             var sw = Stopwatch.StartNew();
-            var dto = await _roles.GetById(id);
+            var dto = await _userStatusService.GetById(id);
             sw.Stop();
             Console.WriteLine($"GET Edit({id}) = {sw.ElapsedMilliseconds} ms");
             if (dto is null) return NotFound();
@@ -99,15 +101,15 @@ namespace SGBL.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, RoleViewModel vm)
+        public async Task<IActionResult> Edit(int id, UserStatusViewModel vm)
         {
             if (id != vm.Id) return BadRequest();
             if (!ModelState.IsValid) return View(vm);
 
-            var updated = await _roles.UpdateAsync(MapToDto(vm), id);
+            var updated = await _userStatusService.UpdateAsync(MapToDto(vm), id);
             if (updated is null) return NotFound();
 
-            TempData["ok"] = $"Rol '{updated.Name}' actualizado.";
+            TempData["ok"] = $"Estado de usuario '{updated.Name}' actualizado.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -115,7 +117,7 @@ namespace SGBL.Web.Controllers
         // ELIMINAR (GET)
         public async Task<IActionResult> Delete(int id)
             {
-                var dto = await _roles.GetById(id);
+                var dto = await _userStatusService.GetById(id);
                 if (dto is null) return NotFound();
                 return View(MapToVm(dto));
             }
@@ -125,13 +127,13 @@ namespace SGBL.Web.Controllers
             [ValidateAntiForgeryToken]
             public async Task<IActionResult> DeleteConfirmed(int id)
             {
-                await _roles.DeleteAsync(id);
-                TempData["ok"] = "Rol eliminado.";
+                await _userStatusService.DeleteAsync(id);
+                TempData["ok"] = "Estado de usuario eliminado.";
                 return RedirectToAction(nameof(Index));
             }
 
             // ---------- Helpers de mapeo (DTO <-> ViewModel) ----------
-            private static RoleViewModel MapToVm(RoleDto dto) => new()
+            private static UserStatusViewModel MapToVm(UserStatusDto dto) => new()
             {
                 Id = dto.Id,
                 Name = dto.Name,
@@ -139,7 +141,7 @@ namespace SGBL.Web.Controllers
                 Message = null
             };
 
-            private static RoleDto MapToDto(RoleViewModel vm) => new()
+            private static UserStatusDto MapToDto(UserStatusViewModel vm) => new()
             {
                 Id = vm.Id,
                 Name = vm.Name

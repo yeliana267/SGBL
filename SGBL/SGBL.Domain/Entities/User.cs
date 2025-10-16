@@ -18,12 +18,12 @@ namespace SGBL.Domain.Entities
         [Column("password")]
         public string Password { get; set; }
         [Column("rol")]
-        public int Role {  get; set; }
+        public int Role { get; set; }
         [Column("estado")]
         public int Status { get; set; }
         [Column("token_activacion")]
         public string TokenActivation { get; set; }
         [Column("token_recuperacion")]
-        public int TokenRecuperation { get; set; }
+        public string TokenRecuperation { get; set; }
     }
 }

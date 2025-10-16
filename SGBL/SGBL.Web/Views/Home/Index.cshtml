@@ -1,8 +1,39 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Panel de Administración</h2>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <div class="row justify-content-center">
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Roles</h5>
+                    <p class="card-text">Administra los roles del sistema.</p>
+                    <a asp-controller="Roles" asp-action="Index" class="btn btn-primary">Ir</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Nacionalidades</h5>
+                    <p class="card-text">Gestiona las nacionalidades registradas.</p>
+                    <a asp-controller="Nationality" asp-action="Index" class="btn btn-success">Ir</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Usuarios</h5>
+                    <p class="card-text">Control de cuentas de usuario.</p>
+                    <a asp-controller="User" asp-action="Index" class="btn btn-info">Ir</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+

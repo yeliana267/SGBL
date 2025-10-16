@@ -15,6 +15,8 @@ namespace SGBL.Application
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<INationalityService, NationalityService>();
+            services.AddScoped<IUserStatusService, UserStatusService>();
+            services.AddScoped<IUserService, UserService>();
         }
 
     }
