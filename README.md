@@ -13,7 +13,6 @@ Antes de instalar y ejecutar el proyecto, asegúrate de tener lo siguiente:
 
 -  Visual Studio 2022 o superior  
 -  .NET SDK versión 6.0 o superior  
--  Acceso a PostgreSQL en la nube (ya configurado)  
 -  Git instalado en tu máquina  
 -  Paquetes NuGet necesarios:
   - `Npgsql` (driver ADO.NET para PostgreSQL)
