@@ -1,28 +1,28 @@
 
-📘 Proyecto Biblioteca – LibraryHub
+ Proyecto Biblioteca – LibraryHub
 
-🧠 Descripción del Proyecto
+ Descripción del Proyecto
 
 LibraryHub es una aplicación desarrollada en C# con Visual Studio que busca optimizar la gestión de préstamos bibliotecarios, mejorar el seguimiento de ejemplares y reducir los inconvenientes tanto para bibliotecarios como para estudiantes.
 
 ---
 
-🛠️ Requisitos Previos
+ Requisitos Previos
 
 Antes de instalar y ejecutar el proyecto, asegúrate de tener lo siguiente:
 
-- 💻 Visual Studio 2022 o superior  
-- 🧱 .NET SDK versión 6.0 o superior  
-- 🐘 Cuenta activa en un proveedor de PostgreSQL en la nube (Railway, Supabase, etc.)  
-- 🔗 Git instalado en tu máquina  
-- 📦 Paquetes NuGet necesarios:
+-  Visual Studio 2022 o superior  
+-  .NET SDK versión 6.0 o superior  
+-  Cuenta activa en un proveedor de PostgreSQL en la nube (Railway, Supabase, etc.)  
+-  Git instalado en tu máquina  
+-  Paquetes NuGet necesarios:
   - `Npgsql` (driver ADO.NET para PostgreSQL)
   - `Microsoft.EntityFrameworkCore`
   - `Microsoft.EntityFrameworkCore.Tools`
 
 ---
 
-📦 Instalación
+Instalación
 
 Sigue estos pasos para clonar e instalar el proyecto localmente:
 
@@ -63,7 +63,7 @@ dotnet ef database update
 
 ---
 
-▶️ Ejecución
+ Ejecución
 
 Para ejecutar el proyecto:
 
@@ -73,7 +73,7 @@ Para ejecutar el proyecto:
 
 ---
 
-🧪 Pruebas
+ Pruebas
 
 Si el proyecto incluye pruebas unitarias:
 
@@ -87,7 +87,7 @@ O desde Visual Studio:
 
 ---
 
-📂 Estructura del Proyecto
+ Estructura del Proyecto
 
 ```
 /proyecto_biblioteca
