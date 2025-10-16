@@ -45,9 +45,8 @@ Luego:
 
 🗄️ Configuración de la Base de Datos en la Nube
 
-1. Accede a tu proveedor de PostgreSQL en la nube y crea una nueva base de datos.
-2. Obtén la cadena de conexión proporcionada por el servicio (ejemplo: Railway, Supabase, etc.).
-3. Actualiza el archivo `appsettings.json` con la cadena de conexión:
+1. Obtén la cadena de conexión proporcionada por el servicio (ejemplo: Railway, Supabase, etc.).
+2. Actualiza el archivo `appsettings.json` con la cadena de conexión:
 
 ```json
 "ConnectionStrings": {
