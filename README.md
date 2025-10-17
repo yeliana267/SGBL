@@ -1,19 +1,18 @@
 
- Proyecto Biblioteca – LibraryHub
+Proyecto Biblioteca – LibraryHub
 
- Descripción del Proyecto
+Descripción del Proyecto
 
-LibraryHub es una aplicación desarrollada en C# con Visual Studio que busca optimizar la gestión de préstamos bibliotecarios, mejorar el seguimiento de ejemplares y reducir los inconvenientes tanto para bibliotecarios como para estudiantes.
+**LibraryHub** es una aplicación desarrollada en C# con Visual Studio que busca optimizar la gestión de préstamos bibliotecarios, mejorar el seguimiento de ejemplares y reducir los inconvenientes tanto para bibliotecarios como para estudiantes.
 
 ---
 
- Requisitos Previos
+Requisitos Previos
 
 Antes de instalar y ejecutar el proyecto, asegúrate de tener lo siguiente:
 
 -  Visual Studio 2022 o superior  
 -  .NET SDK versión 6.0 o superior  
--  Cuenta activa en un proveedor de PostgreSQL en la nube (Railway, Supabase, etc.)  
 -  Git instalado en tu máquina  
 -  Paquetes NuGet necesarios:
   - `Npgsql` (driver ADO.NET para PostgreSQL)
@@ -43,27 +42,19 @@ Luego:
 
 ---
 
-🗄️ Configuración de la Base de Datos en la Nube
+ Configuración – Base de Datos en la Nube
 
-1. Accede a tu proveedor de PostgreSQL en la nube y crea una nueva base de datos.
-2. Obtén la cadena de conexión proporcionada por el servicio (ejemplo: Railway, Supabase, etc.).
-3. Actualiza el archivo `appsettings.json` con la cadena de conexión:
+ 
+La cadena de conexión a PostgreSQL en la nube ya está definida en los siguientes archivos:
 
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Host=tu_host;Port=5432;Database=nombre_bd;Username=usuario;Password=contraseña;SSL Mode=Require;Trust Server Certificate=true"
-}
-```
+- `SGBL.Web/appsettings.json`  
+- `SGBL.Web/appsettings.Development.json`
 
-4. Ejecuta las migraciones (si usas Entity Framework Core):
-
-```bash
-dotnet ef database update
-```
+La aplicación apunta directamente a una base de datos remota, por lo que **no necesitas instalar ni crear una base de datos local**.
 
 ---
 
- Ejecución
+Ejecución
 
 Para ejecutar el proyecto:
 
@@ -73,7 +64,7 @@ Para ejecutar el proyecto:
 
 ---
 
- Pruebas
+Pruebas
 
 Si el proyecto incluye pruebas unitarias:
 
@@ -86,8 +77,7 @@ O desde Visual Studio:
 - Ve a “Prueba” → “Ejecutar todas las pruebas”.
 
 ---
-
- Estructura del Proyecto
+Estructura del Proyecto
 
 ```
 /proyecto_biblioteca
@@ -103,3 +93,5 @@ O desde Visual Studio:
 ├── /touch
 ├── SGBL.sln
 └── README.md
+```
+
