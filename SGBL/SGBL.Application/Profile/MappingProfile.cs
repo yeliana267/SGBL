@@ -5,6 +5,7 @@ using SGBL.Application.Dtos.Nationality;
 using SGBL.Application.Dtos.User;
 using SGBL.Application.Services;
 using SGBL.Application.Dtos.Book;
+using SGBL.Application.Dtos.Reminders;
 
 namespace SGBL.Application.Profiles
 {
@@ -67,15 +68,27 @@ namespace SGBL.Application.Profiles
                 .ForMember(d => d.CreatedAt, o => o.Ignore())
                 .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
 
-CreateMap<BookStatus, BookStatusDto>()
-.ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
-.ForMember(d => d.Name, o => o.MapFrom(s => s.Name));
+            CreateMap<BookStatus, BookStatusDto>()
+            .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
+            .ForMember(d => d.Name, o => o.MapFrom(s => s.Name));
 
-CreateMap<BookStatusDto, BookStatus>()
-.ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
-.ForMember(d => d.Name, o => o.MapFrom(s => s.Name))
-.ForMember(d => d.CreatedAt, o => o.Ignore())
-.ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
+            CreateMap<BookStatusDto, BookStatus>()
+            .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
+            .ForMember(d => d.Name, o => o.MapFrom(s => s.Name))
+            .ForMember(d => d.CreatedAt, o => o.Ignore())
+            .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
+
+            CreateMap<ReminderStatus, ReminderStatusDto>()
+           .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
+           .ForMember(d => d.Name, o => o.MapFrom(s => s.Name));
+
+            CreateMap<ReminderStatusDto, ReminderStatus>()
+            .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
+            .ForMember(d => d.Name, o => o.MapFrom(s => s.Name))
+            .ForMember(d => d.CreatedAt, o => o.Ignore())
+            .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
+
+
 
         }
     }

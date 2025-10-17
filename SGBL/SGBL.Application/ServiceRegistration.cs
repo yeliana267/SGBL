@@ -18,6 +18,7 @@ namespace SGBL.Application
             services.AddScoped<IUserStatusService, UserStatusService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IBookStatusService, BookStatusService>();
+            services.AddScoped<IReminderStatusService, ReminderStatusService>();
         }
 
     }

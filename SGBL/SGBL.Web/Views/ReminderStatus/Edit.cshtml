@@ -1,0 +1,38 @@
+﻿@model SGBL.Application.ViewModels.ReminderStatusViewModel
+@{
+    ViewData["Title"] = "Editar Estado de Recordatorio";
+}
+
+<h2 class="mt-3">Editar Estado de Recordatorio</h2>
+
+<form asp-action="Edit" method="post" id="editForm" asp-controller="ReminderStatus">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+
+
+    <button id="btnSave" type="submit" class="btn btn-primary">Actualizar</button>
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+    <script>
+        (function(){
+          const form = document.getElementById('editForm');
+          const btn  = document.getElementById('btnSave');
+          form.addEventListener('submit', function(e){
+            // si el form es válido en cliente, desactiva el botón
+            // (jquery.validate ya previene el submit si hay errores)
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+          });
+        })();
+    </script>
+}

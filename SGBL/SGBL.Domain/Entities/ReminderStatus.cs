@@ -13,6 +13,6 @@ namespace SGBL.Domain.Entities
         [Key]
         public override int Id { get; set; }
         [Column("nombre")]
-        public string Name { get; set; }
+        public required string Name { get; set; }
     }
 }

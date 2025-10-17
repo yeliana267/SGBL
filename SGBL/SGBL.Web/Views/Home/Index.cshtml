@@ -4,9 +4,9 @@
 <div class="container mt-5">
     <h2 class="text-center mb-4">Panel de Administración</h2>
 
-    <div class="row justify-content-center">
-        <div class="col-md-3">
-            <div class="card shadow-sm">
+    <div class="row justify-content-center g-4" style="display: flex; flex-wrap: wrap; align-items: stretch; gap: 1.5rem;">
+        <div class="col-md-3 d-flex">
+            <div class="card shadow-sm flex-fill">
                 <div class="card-body text-center">
                     <h5 class="card-title">Roles</h5>
                     <p class="card-text">Administra los roles del sistema.</p>
@@ -15,8 +15,8 @@
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm">
+        <div class="col-md-3 d-flex">
+            <div class="card shadow-sm flex-fill">
                 <div class="card-body text-center">
                     <h5 class="card-title">Nacionalidades</h5>
                     <p class="card-text">Gestiona las nacionalidades registradas.</p>
@@ -25,8 +25,8 @@
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm">
+        <div class="col-md-3 d-flex">
+            <div class="card shadow-sm flex-fill">
                 <div class="card-body text-center">
                     <h5 class="card-title">Usuarios</h5>
                     <p class="card-text">Control de cuentas de usuario.</p>
@@ -34,8 +34,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm">
+
+        <div class="col-md-3 d-flex">
+            <div class="card shadow-sm flex-fill">
                 <div class="card-body text-center">
                     <h5 class="card-title">Estados de Usuario</h5>
                     <p class="card-text">Control de estados del usuario.</p>
@@ -43,8 +44,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm">
+
+        <div class="col-md-3 d-flex">
+            <div class="card shadow-sm flex-fill">
                 <div class="card-body text-center">
                     <h5 class="card-title">Estados de Libros</h5>
                     <p class="card-text">Control de estados del Libro.</p>
@@ -52,6 +54,17 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-3 d-flex">
+            <div class="card shadow-sm flex-fill">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Estados de Recordatorios</h5>
+                    <p class="card-text">Control de estados de los Recordatorios.</p>
+                    <a asp-controller="ReminderStatus" asp-action="Index" class="btn btn-info">Ir</a>
+                </div>
+            </div>
+        </div>
     </div>
+
 </div>
 

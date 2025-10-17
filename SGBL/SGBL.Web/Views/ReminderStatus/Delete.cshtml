@@ -1,0 +1,25 @@
+﻿@model SGBL.Application.ViewModels.ReminderStatusViewModel
+@{
+    ViewData["Title"] = "Eliminar Estado de Recordatorio";
+}
+
+<h2 class="mt-3 text-danger">Eliminar Estado de Recordatorio</h2>
+
+<div class="alert alert-warning">
+    <strong>¿Estás segura?</strong> Este cambio no se puede deshacer.
+</div>
+
+<dl class="row">
+    <dt class="col-sm-2">ID</dt>
+    <dd class="col-sm-10">@Model.Id</dd>
+
+    <dt class="col-sm-2">Estado</dt>
+    <dd class="col-sm-10">@Model.Name</dd>
+</dl>
+
+<form asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
