@@ -3,6 +3,8 @@ using SGBL.Domain.Entities;
 using SGBL.Application.Dtos.Role;
 using SGBL.Application.Dtos.Nationality;
 using SGBL.Application.Dtos.User;
+using SGBL.Application.Services;
+using SGBL.Application.Dtos.Book;
 
 namespace SGBL.Application.Profiles
 {
@@ -13,7 +15,7 @@ namespace SGBL.Application.Profiles
             CreateMap<Role, RoleDto>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
                 .ForMember(d => d.Name, o => o.MapFrom(s => s.Name));
-              
+
 
             CreateMap<RoleDto, Role>()
             .ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
@@ -64,6 +66,16 @@ namespace SGBL.Application.Profiles
                 .ForMember(d => d.TokenRecuperation, o => o.Ignore())
                 .ForMember(d => d.CreatedAt, o => o.Ignore())
                 .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
+
+CreateMap<BookStatus, BookStatusDto>()
+.ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
+.ForMember(d => d.Name, o => o.MapFrom(s => s.Name));
+
+CreateMap<BookStatusDto, BookStatus>()
+.ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
+.ForMember(d => d.Name, o => o.MapFrom(s => s.Name))
+.ForMember(d => d.CreatedAt, o => o.Ignore())
+.ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
 
         }
     }
