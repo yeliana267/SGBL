@@ -50,6 +50,8 @@ namespace SGBL.Persistence
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBookStatusRepository, BookStatusRepository>();
             services.AddScoped<IReminderStatusRepository, ReminderStatusRepository>();
+            services.AddScoped<INotificationStatusRepository, NotificationStatusRepository>();
+            services.AddScoped<INotificationTypeRepository, NotificationTypeRepository>();
             #endregion
         }
     }

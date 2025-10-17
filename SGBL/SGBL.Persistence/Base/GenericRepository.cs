@@ -98,7 +98,7 @@ namespace SGBL.Persistence.Base
             return _dbSet.AsNoTracking();
         }
 
-        // ✅ Útil si luego quieres paginar
+        // Útil si luego quieres paginar
         public virtual async Task<List<TEntity>> GetPageAsync(int page, int pageSize)
         {
             if (page <= 0) page = 1;
