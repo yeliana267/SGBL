@@ -22,9 +22,11 @@ a {
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
-
+.navbar-brand {
+    background-color: #263F67;
+}
 .border-top {
-  border-top: 1px solid #e5e5e5;
+    border-top: 1px solid #e5e5e5;
 }
 .border-bottom {
   border-bottom: 1px solid #e5e5e5;
@@ -32,6 +34,9 @@ a {
 
 .box-shadow {
   box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+.bg-custom {
+    background-color: #263F67 !important;
 }
 
 button.accept-policy {
