@@ -67,7 +67,6 @@ namespace SGBL.Persistence.Base
 
                 var entry = await _dbSet.FindAsync(id);
                 _serviceLogs.CreateLogInfo($"Busquedad por id de un/una {_entity} terminida.");
-                throw new Exception("Error forzado para probar el catch.");
                 if (entry != null)
                 {
                     _context.Entry(entry).CurrentValues.SetValues(entity);
