@@ -91,7 +91,7 @@ namespace SGBL.Application.Services
         {
             try
             {
-                _serviceLogs.CreateLogInfo($"´Busquedad por id {_entity}  iniciada.");
+                _serviceLogs.CreateLogInfo($"Busquedad por id {_entity}  iniciada.");
 
                 var entity = await _repository.GetById(id);
                 return entity is null ? null : _mapper.Map<TDto>(entity);
