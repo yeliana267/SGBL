@@ -16,6 +16,7 @@ namespace SGBL.Web
             
             builder.Services.AddPersistenceLayerIoc(builder.Configuration);
             builder.Services.AddApplicationLayerIoc();
+            builder.Services.AddInfraestructureLayerIoc();
             // Program.cs (solo para pruebas)
 
             builder.Services.AddOutputCache();

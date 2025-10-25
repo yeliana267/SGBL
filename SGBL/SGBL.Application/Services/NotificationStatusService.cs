@@ -13,10 +13,13 @@ namespace SGBL.Application.Services
     {
         private readonly INotificationStatusRepository _INotificationtatusRepository;
         private readonly IMapper _mapper;
-        public NotificationStatusService(INotificationStatusRepository notificationStatusRepository, IMapper mapper) : base(notificationStatusRepository, mapper)
+        private readonly IServiceLogs _serviceLogs;
+
+        public NotificationStatusService(INotificationStatusRepository notificationStatusRepository, IMapper mapper,IServiceLogs serviceLogs) : base(notificationStatusRepository, mapper, serviceLogs)
         {
             _INotificationtatusRepository = notificationStatusRepository;
             _mapper = mapper;
+            _serviceLogs = serviceLogs;
         }
     }
 }

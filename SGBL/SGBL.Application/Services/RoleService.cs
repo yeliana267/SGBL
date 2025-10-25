@@ -11,11 +11,12 @@ namespace SGBL.Application.Services
     {
         private readonly IRoleRepository _roleRepository;
         private readonly IMapper _mapper;
-
-        public RoleService(IRoleRepository roleRepository, IMapper mapper) : base(roleRepository, mapper)
+        private readonly IServiceLogs _serviceLogs;
+        public RoleService(IRoleRepository roleRepository, IMapper mapper, IServiceLogs serviceLogs) : base(roleRepository, mapper, serviceLogs)
         {
             _roleRepository = roleRepository;
             _mapper = mapper;
+            _serviceLogs = serviceLogs;
         }
     }
 }

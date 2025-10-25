@@ -1,4 +1,5 @@
 ﻿
+using SGBL.Application.Interfaces;
 using SGBL.Domain.Entities;
 using SGBL.Domain.Interfaces;
 using SGBL.Persistence.Base;
@@ -9,8 +10,10 @@ namespace SGBL.Persistence.Repositories
     public class ReminderStatusRepository : GenericRepository<ReminderStatus>, IReminderStatusRepository
     {
         private readonly SGBLContext _context;
-        public ReminderStatusRepository(SGBLContext context) : base(context)
+        private readonly IServiceLogs _serviceLogs;
+        public ReminderStatusRepository(SGBLContext context, IServiceLogs serviceLogs) : base(context, serviceLogs)
         {
+            _serviceLogs = serviceLogs;
             _context = context;
         }
     }

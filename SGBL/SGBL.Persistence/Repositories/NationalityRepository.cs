@@ -1,4 +1,5 @@
-﻿using SGBL.Domain.Entities;
+﻿using SGBL.Application.Interfaces;
+using SGBL.Domain.Entities;
 using SGBL.Domain.Interfaces;
 using SGBL.Persistence.Base;
 using SGBL.Persistence.Context;
@@ -9,9 +10,10 @@ namespace SGBL.Persistence.Repositories
     public class NationalityRepository : GenericRepository<Nationality>, INationalityRepository
     {
         private readonly SGBLContext _context;
-
-        public NationalityRepository(SGBLContext context) : base(context)
+        private readonly IServiceLogs _serviceLogs;
+        public NationalityRepository(SGBLContext context, IServiceLogs serviceLogs) : base(context, serviceLogs)
         {
+            _serviceLogs = serviceLogs;
             _context = context;
         }
     }

@@ -1,4 +1,5 @@
 ﻿
+using SGBL.Application.Interfaces;
 using SGBL.Domain.Entities;
 using SGBL.Domain.Interfaces;
 using SGBL.Persistence.Base;
@@ -10,8 +11,10 @@ namespace SGBL.Persistence.Repositories
     public class NotificationStatusRepository : GenericRepository<NotificationStatus>, INotificationStatusRepository
     {
         private readonly SGBLContext _context;
-        public NotificationStatusRepository(SGBLContext context) : base(context)
+        private readonly IServiceLogs _serviceLogs;
+        public NotificationStatusRepository(SGBLContext context, IServiceLogs serviceLogs) : base(context, serviceLogs)
         {
+            _serviceLogs = serviceLogs;
             _context = context;
         }
         

@@ -10,10 +10,13 @@ namespace SGBL.Application.Services
     {
         private readonly IBookStatusRepository _bookStatusRepository;
         private readonly IMapper _mapper;
-        public BookStatusService(IBookStatusRepository bookStatusRepository, IMapper mapper) : base(bookStatusRepository, mapper)
+        private readonly IServiceLogs _serviceLogs;
+        public BookStatusService(IBookStatusRepository bookStatusRepository, IMapper mapper, IServiceLogs serviceLogs) : base(bookStatusRepository, mapper, serviceLogs)
         {
             _bookStatusRepository = bookStatusRepository;
             _mapper = mapper;
+            _serviceLogs = serviceLogs;
+
         }
 
     }

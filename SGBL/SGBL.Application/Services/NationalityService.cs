@@ -11,10 +11,13 @@ namespace SGBL.Application.Services
     {
         private readonly INationalityRepository _nationalityRepository;
         private readonly IMapper _mapper;
-        public NationalityService(INationalityRepository nationalityRepository, IMapper mapper) : base(nationalityRepository, mapper)
+        private readonly IServiceLogs _serviceLogs;
+
+        public NationalityService(INationalityRepository nationalityRepository, IMapper mapper, IServiceLogs serviceLogs) : base(nationalityRepository, mapper, serviceLogs)
         {
             _nationalityRepository = nationalityRepository;
             _mapper = mapper;
+            _serviceLogs = serviceLogs;
         }
 
     }

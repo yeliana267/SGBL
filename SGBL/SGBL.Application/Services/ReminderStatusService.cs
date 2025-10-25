@@ -12,10 +12,12 @@ namespace SGBL.Application.Services
     {
         private readonly IReminderStatusRepository _IReminderStatusRepository;
         private readonly IMapper _mapper;
-        public ReminderStatusService(IReminderStatusRepository reminderStatusRepository, IMapper mapper) : base(reminderStatusRepository, mapper)
+        private readonly IServiceLogs _serviceLogs;
+        public ReminderStatusService(IReminderStatusRepository reminderStatusRepository, IMapper mapper, IServiceLogs serviceLogs) : base(reminderStatusRepository, mapper, serviceLogs)
         {
             _IReminderStatusRepository = reminderStatusRepository;
             _mapper = mapper;
+            _serviceLogs = serviceLogs;
         }
     }
 }

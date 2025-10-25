@@ -12,40 +12,66 @@ namespace SGBL.Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
-        public UserService(IUserRepository userRepository, IMapper mapper) : base(userRepository, mapper)
+        private readonly IServiceLogs _serviceLogs;
+        public UserService(IUserRepository userRepository, IMapper mapper, IServiceLogs serviceLogs) : base(userRepository, mapper, serviceLogs)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _serviceLogs = serviceLogs;
         }
-        public async Task<UserDto> AddAsync(UserDto dto)
+        public override async Task<UserDto> AddAsync(UserDto dto)
         {
-            var user = _mapper.Map<User>(dto);
+         
+            try
+            {
+                _serviceLogs.CreateLogInfo($"Creación del usuario  {dto.Name}, email:{dto.Email}  iniciada.");
+                var user = _mapper.Map<User>(dto);
 
-            // Campos obligatorios
-            user.Password = dto.Password ?? "1234";  // temporal si falta
-            user.TokenActivation = Guid.NewGuid().ToString("N");
-            user.TokenRecuperation = Guid.NewGuid().ToString("N");
-            user.CreatedAt = DateTime.UtcNow;
+                // Campos obligatorios
+                user.Password = dto.Password ?? "1234";  // temporal si falta
+                user.TokenActivation = Guid.NewGuid().ToString("N");
+                user.TokenRecuperation = Guid.NewGuid().ToString("N");
+                user.CreatedAt = DateTime.UtcNow;
 
-            await _userRepository.AddAsync(user);
-            return _mapper.Map<UserDto>(user);
+                await _userRepository.AddAsync(user);
+                return _mapper.Map<UserDto>(user);
+
+            }
+            catch (Exception ex)
+            {
+                _serviceLogs.CreateLogWarning($"Error en en la capa Aplication con la creacion del usuario {dto.Id}, email: {dto.Email}, id: {dto.Id}, " + ex);
+                throw;
+            }
         }
-        public async Task<UserDto> UpdateAsync(UserDto dto, int id)
+        public override async Task<UserDto> UpdateAsync(UserDto dto, int id)
+
         {
-            var existing = await _userRepository.GetById(id);
-            if (existing == null) throw new InvalidOperationException("Usuario no encontrado");
 
-            // Mapear sin pisar con nulls (configura AutoMapper para ignorar nulls)
-            _mapper.Map(dto, existing);
+          
+            try
+            {
+                _serviceLogs.CreateLogInfo($"Actualización del usuario {dto.Name}, email:{dto.Email} iniciada.");
+                var existing = await _userRepository.GetById(id);
+                if (existing == null) throw new InvalidOperationException("Usuario no encontrado");
 
-            // Password: solo si viene
-            if (!string.IsNullOrWhiteSpace(dto.Password))
-                existing.Password = dto.Password; // aquí aplica hash si corresponde
+                // Mapear sin pisar con nulls (configura AutoMapper para ignorar nulls)
+                _mapper.Map(dto, existing);
 
-            existing.UpdatedAt = DateTime.UtcNow;
+                // Password: solo si viene
+                if (!string.IsNullOrWhiteSpace(dto.Password))
+                    existing.Password = dto.Password; // aquí aplica hash si corresponde
 
-            await _userRepository.UpdateAsync(id, existing); // 👈 orden correcto
-            return _mapper.Map<UserDto>(existing);
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                await _userRepository.UpdateAsync(id, existing); // 👈 orden correcto
+                return _mapper.Map<UserDto>(existing);
+
+            }
+            catch (Exception ex)
+            {
+                _serviceLogs.CreateLogWarning($"Error en en la capa Aplication con la actualización del usuario {dto.Id}, email: {dto.Email}, id: {dto.Id}, " + ex);
+                throw;
+            }
         }
     }
 }
