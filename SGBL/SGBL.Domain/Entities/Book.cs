@@ -30,5 +30,8 @@ namespace SGBL.Domain.Entities
         [Column("estado")]
         public int Status { get; set; }
 
+        public ICollection<BookGenre> BookGenres { get; set; } = new List<BookGenre>();
+
+
     }
 }
