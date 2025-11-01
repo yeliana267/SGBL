@@ -1,8 +1,9 @@
 ﻿
 namespace SGBL.Application.Dtos
 {
-    public class BaseDto
+    public abstract class BaseDto <T>
     {
-    public int Id { get; set; }
+        public virtual T Id { get; set; } = default!;
+
     }
 }

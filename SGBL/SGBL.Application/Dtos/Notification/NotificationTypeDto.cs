@@ -3,11 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGBL.Application.Dtos.Notification
 {
-    public class NotificationTypeDto : BaseDto
+    public class NotificationTypeDto : BaseAuditableDto<int>
     {
 
-            [Required, StringLength(20)]
-            public string Name { get; set; } = default!;
+        public string Name { get; set; } = default!;
         
     }
 

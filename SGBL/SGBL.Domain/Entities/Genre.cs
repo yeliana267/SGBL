@@ -1,6 +1,4 @@
-﻿
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using SGBL.Domain.Base;
 
@@ -16,8 +14,6 @@ namespace SGBL.Domain.Entities
         public string Name { get; set; }
         [Column("descripcion")]
         public string Description { get; set; }
-
-        public ICollection<BookGenre> BookGenres { get; set; } = new List<BookGenre>();
 
     }
 }

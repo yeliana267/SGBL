@@ -2,10 +2,10 @@
 
 namespace SGBL.Application.ViewModels
 {
-    public class BaseViewModel
+    public abstract class BaseViewModel <Type>
     {
        
-        public int Id { get; set; }
+        public abstract Type Id { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 

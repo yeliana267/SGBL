@@ -1,12 +1,9 @@
-using Application.ViewModels.LoanStatus;
+using SGBL.Application.Dtos.Loan;
+using SGBL.Application.Interfaces;
 
 namespace Application.Interfaces.Services;
 
-public interface ILoanStatusService
+public interface ILoanStatusService : IGenericService<LoanStatusDto>
 {
-    Task<int> CreateAsync(LoanStatusCreateDto dto, CancellationToken ct = default);
-    Task<bool> UpdateAsync(LoanStatusUpdateDto dto, CancellationToken ct = default);
-    Task<bool> DeleteAsync(int id, CancellationToken ct = default);
-    Task<LoanStatusListItemDto?> GetByIdAsync(int id, CancellationToken ct = default);
-    Task<IReadOnlyList<LoanStatusListItemDto>> ListAsync(bool? onlyActive = null, CancellationToken ct = default);
+    
 }

@@ -1,11 +1,12 @@
 ﻿namespace SGBL.Application.ViewModels
 {
-    public class UserViewModel : BaseViewModel
+    public class UserViewModel : BaseViewModel<int>
     {
-        public string Name { get; set; }       // mapea con 'Name' de User
+        public override int Id { get; set; }
+        public string Name { get; set; }      
         public string Email { get; set; }
         public string Password { get; set; }
-        public int Role { get; set; }             // FK hacia roles
-        public int Status { get; set; }           // FK hacia usuario_estados
+        public int Role { get; set; }           
+        public int Status { get; set; }          
     }
 }

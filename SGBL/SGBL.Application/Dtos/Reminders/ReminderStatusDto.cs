@@ -3,11 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGBL.Application.Dtos.Reminders
 {
-    public class ReminderStatusDto : BaseDto
+    public class ReminderStatusDto : BaseAuditableDto<int>
     {
-
-            [Required, StringLength(20)]
-            public string Name { get; set; } = default!;
+        public string Name { get; set; } = default!;
         
     }
 

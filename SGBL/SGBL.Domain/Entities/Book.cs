@@ -14,7 +14,7 @@ namespace SGBL.Domain.Entities
         [Column("titulo")]
         public string Title { get; set; }
         [Column("isbn")]
-        public int Isbn { get; set; }
+        public long Isbn { get; set; }
         [Column("descripcion")]
         public string Description { get; set; }
         [Column("año_publicacion")]
@@ -29,9 +29,6 @@ namespace SGBL.Domain.Entities
         public string Ubication { get; set; }
         [Column("estado")]
         public int Status { get; set; }
-
-        public ICollection<BookGenre> BookGenres { get; set; } = new List<BookGenre>();
-
 
     }
 }
