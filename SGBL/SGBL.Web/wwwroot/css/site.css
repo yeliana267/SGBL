@@ -1,37 +1,62 @@
+/* ===== VARIABLES GLOBALES ===== */
+:root {
+    /* Colores principales */
+    --color-crema: #E2DED2;
+    --color-azul: #182D4C;
+    --color-dorado: #C8A952; /* Asumí que este es el dorado, corrígeme si es otro */
+    --color-crema-claro: #FDF2D2;
+    /* Colores secundarios */
+    --color-blanco: #FFFFFF;
+    --color-negro: #333333;
+    --color-gris: #7A7A7A;
+    /* Tipografía */
+    --font-garamond: "Garamond", "Times New Roman", serif;
+    --font-size-base: 16px;
+    /* Espaciados */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+}
+
+/* ===== ESTILOS EXISTENTES (los mantienes) ===== */
 html {
     font-size: 14px;
-    background-color: #E2DED2;
 }
 
 @media (min-width: 768px) {
     html {
         font-size: 16px;
-      
     }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
     margin-bottom: 60px;
-    background-color: #E2DED2;
+    background-color: var(--color-crema);
+    font-family: var(--font-garamond); 
+    color: var(--color-negro); 
+    line-height: 1.6;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+    color: var(--bs-secondary-color);
+    text-align: end;
 }
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+    text-align: start;
 }
+
 /* Estilos para la tabla de estados */
 .table th {
     border-top: none;
@@ -44,4 +69,357 @@ body {
 
 .table-hover tbody tr:hover {
     background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* ===== NUEVOS ESTILOS CENTRALIZADOS ===== */
+
+/* COMPONENTES REUTILIZABLES */
+.btn {
+    padding: var(--spacing-xs) var(--spacing-md);
+    border: none;
+    border-radius: 4px;
+    font-family: var(--font-garamond);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: var(--color-azul);
+    color: var(--color-blanco);
+}
+
+    .btn-primary:hover {
+        background-color: #0F1F33;
+        transform: translateY(-2px);
+    }
+
+.btn-secondary {
+    background-color: var(--color-dorado);
+    color: var(--color-azul);
+}
+
+    .btn-secondary:hover {
+        background-color: #B89742;
+        transform: translateY(-2px);
+    }
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--color-azul);
+    color: var(--color-azul);
+}
+
+/* Tarjetas */
+.card {
+    background-color: var(--color-blanco);
+    border-radius: 8px;
+    padding: var(--spacing-md);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-crema-claro);
+}
+
+/* Formularios */
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-azul);
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 2px solid var(--color-crema-claro);
+    border-radius: 4px;
+    font-family: var(--font-garamond);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--color-dorado);
+    }
+
+/* Navbar */
+.navbar {
+    background-color: var(--color-azul);
+    padding: var(--spacing-sm) 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    color: var(--color-crema-claro);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* ===== ESTILOS ESPECÍFICOS PARA LOGIN ===== */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-crema) 0%, var(--color-crema-claro) 100%);
+    padding: var(--spacing-md);
+}
+
+.login-card {
+    background-color: var(--color-blanco);
+    border-radius: 12px;
+    padding: 1.5rem; /* Reducido de var(--spacing-xl) */
+    box-shadow: 0 10px 30px rgba(24, 45, 76, 0.1);
+    width: 100%;
+    max-width: 380px; /* Reducido de 400px */
+    border: 2px solid var(--color-crema-claro);
+    /* ELIMINAMOS las líneas que causaban scroll */
+    /* max-height: 90vh; */
+    /* overflow-y: auto; */
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 1.5rem; /* Reducido de var(--spacing-lg) */
+}
+
+.login-logo {
+    color: var(--color-azul);
+    font-size: 2rem; /* Reducido de 2.5rem */
+    margin-bottom: 0.75rem; /* Reducido */
+}
+
+.login-title {
+    color: var(--color-azul);
+    font-size: 1.5rem; /* Reducido de 1.8rem */
+    margin-bottom: 0.5rem; /* Reducido */
+}
+
+.login-subtitle {
+    color: var(--color-gris);
+    font-size: 0.9rem; /* Reducido de 1rem */
+}
+
+.login-form .form-group {
+    margin-bottom: 1rem; /* Reducido de var(--spacing-md) */
+}
+
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem; /* Reducido */
+    font-size: 0.85rem; /* Un poco más pequeño */
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.forgot-password {
+    color: var(--color-azul);
+    text-decoration: none;
+}
+
+    .forgot-password:hover {
+        text-decoration: underline;
+    }
+
+.login-button {
+    width: 100%;
+    padding: 0.75rem; /* Reducido de var(--spacing-sm) */
+    font-size: 1rem; /* Reducido de 1.1rem */
+    margin-bottom: 1rem; /* Reducido */
+}
+
+.login-footer {
+    text-align: center;
+    color: var(--color-gris);
+}
+
+.register-link {
+    color: var(--color-azul);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+    .register-link:hover {
+        text-decoration: underline;
+    }
+
+/* ===== UTILIDADES ===== */
+.text-center {
+    text-align: center;
+}
+
+.text-azul {
+    color: var(--color-azul);
+}
+
+.text-dorado {
+    color: var(--color-dorado);
+}
+
+.bg-crema {
+    background-color: var(--color-crema);
+}
+
+.bg-crema-claro {
+    background-color: var(--color-crema-claro);
+}
+
+.mt-1 {
+    margin-top: var(--spacing-xs);
+}
+
+.mt-2 {
+    margin-top: var(--spacing-sm);
+}
+
+.mt-3 {
+    margin-top: var(--spacing-md);
+}
+
+.mb-1 {
+    margin-bottom: var(--spacing-xs);
+}
+
+.mb-2 {
+    margin-bottom: var(--spacing-sm);
+}
+
+.mb-3 {
+    margin-bottom: var(--spacing-md);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    :root {
+        --font-size-base: 14px;
+    }
+
+    .login-card {
+        padding: var(--spacing-lg);
+        margin: var(--spacing-sm);
+    }
+
+    .login-options {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: flex-start;
+    }
+}
+
+/* ===== ESTILOS ESPECÍFICOS PARA ALERTAS Y COMPONENTES BOOTSTRAP ===== */
+.alert {
+    border-radius: 8px;
+    margin-bottom: 1rem; /* Reducido */
+    padding: 0.75rem; /* Más compacto */
+}
+
+.alert-warning {
+    background-color: #FFF3CD;
+    color: #856404;
+    border-left: 4px solid #FFC107;
+}
+
+.alert-success {
+    background-color: #D1E7DD;
+    color: #0F5132;
+    border-left: 4px solid #198754;
+}
+
+.alert-danger {
+    background-color: #F8D7DA;
+    color: #721C24;
+    border-left: 4px solid #DC3545;
+}
+
+/* Input group personalizado */
+.input-group-text {
+    background-color: var(--color-crema-claro);
+    border: 2px solid var(--color-crema-claro);
+    border-right: none;
+}
+
+.form-control {
+    border: 2px solid var(--color-crema-claro);
+    border-left: none;
+}
+
+.input-group .form-control:focus {
+    border-color: var(--color-dorado);
+    border-left: none;
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: var(--color-dorado);
+}
+
+.form-group .input-group {
+    margin-bottom: 0.25rem;
+}
+
+/* Mejoras para los botones de alerta */
+.btn-warning {
+    background-color: var(--color-dorado);
+    color: var(--color-azul);
+    border: none;
+}
+
+    .btn-warning:hover {
+        background-color: #B89742;
+        color: var(--color-azul);
+    }
+
+/* Ajustes para validación */
+.text-danger {
+    color: #DC3545 !important;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Mejoras responsive para el login */
+@media (max-width: 576px) {
+    .login-options {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: flex-start;
+    }
+
+    .input-group-text {
+        padding: 0.5rem;
+    }
+
+    .login-card {
+        margin: var(--spacing-sm);
+        padding: var(--spacing-lg);
+    }
+}
+
+/* ===== ESTILOS ESPECÍFICOS PARA REGISTRO ===== */
+/* Si necesitas que la tarjeta de registro sea más ancha */
+.register-card {
+    max-width: 420px; /* Un poco más ancha que el login */
+}
+
+/* O puedes usar la misma clase del login que ya tenemos */
+.login-card {
+    /* Ya está definida, pero si necesitas ajustar para registro */
+    max-width: 380px; /* Mantenemos el mismo tamaño compacto */
+}
+
+/* Asegurar que los grupos de formulario sean compactos */
+.login-form .form-group {
+    margin-bottom: 1rem;
 }
