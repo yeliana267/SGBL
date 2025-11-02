@@ -25,5 +25,7 @@ namespace SGBL.Domain.Entities
         public string TokenActivation { get; set; }
         [Column("token_recuperacion")]
         public string TokenRecuperation { get; set; }
+        [Column("token_activacion_expiracion")]
+        public DateTime? TokenActivationExpires { get; set; }
     }
 }

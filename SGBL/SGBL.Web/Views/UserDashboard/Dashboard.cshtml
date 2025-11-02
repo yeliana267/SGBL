@@ -1,0 +1,171 @@
+﻿@{
+    ViewData["Title"] = "Mi Dashboard";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-tachometer-alt text-success me-2"></i>@ViewData["Title"]
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="@Url.Action("Books", "UserDashboard")" class="btn btn-success">
+            <i class="fas fa-search me-1"></i> Buscar Libros
+        </a>
+    </div>
+</div>
+
+<!-- Bienvenida -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-gradient-success text-white shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="card-title">¡Bienvenido de vuelta, @ViewData["UserName"]!</h4>
+                        <p class="card-text mb-0">Estamos contentos de verte de nuevo en nuestra biblioteca.</p>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-book-reader fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mis estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-4">
+        <div class="card border-left-primary shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Préstamos Activos
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">3</div>
+                        <div class="mt-2">
+                            <a href="@Url.Action("MyLoans", "UserDashboard")" class="btn btn-sm btn-outline-primary">
+                                Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-bookmark fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card border-left-success shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Libros Leídos
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">24</div>
+                        <div class="mt-2">
+                            <span class="text-success small">+2 este mes</span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-book-open fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card border-left-warning shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Próxima Devolución
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">2 días</div>
+                        <div class="mt-2">
+                            <span class="text-warning small">"Cien años de soledad"</span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Préstamos activos y recomendaciones -->
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Mis Préstamos Activos</h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Cien años de soledad</h6>
+                            <small class="text-warning">Vence en 2 días</small>
+                        </div>
+                        <p class="mb-1">Gabriel García Márquez</p>
+                        <small class="text-muted">Prestado: 15 Oct 2024</small>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">El Quijote</h6>
+                            <small class="text-success">Vence en 10 días</small>
+                        </div>
+                        <p class="mb-1">Miguel de Cervantes</p>
+                        <small class="text-muted">Prestado: 20 Oct 2024</small>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="@Url.Action("MyLoans", "UserDashboard")" class="btn btn-outline-primary btn-sm">
+                        Ver Todos Mis Préstamos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Recomendaciones Para Ti</h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Rayuela</h6>
+                            <small class="text-success">Disponible</small>
+                        </div>
+                        <p class="mb-1">Julio Cortázar</p>
+                        <small class="text-muted">Basado en tu historial de lectura</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">La casa de los espíritus</h6>
+                            <small class="text-success">Disponible</small>
+                        </div>
+                        <p class="mb-1">Isabel Allende</p>
+                        <small class="text-muted">Realismo mágico</small>
+                    </a>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="@Url.Action("Books", "UserDashboard")" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-search me-1"></i> Buscar Más Libros
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>s

@@ -11,50 +11,91 @@ namespace SGBL.Infraestructure.Services
     {
         private readonly MailSettings _mailSettings;
         private readonly ILogger<EmailService> _logger;
+
         public EmailService(IOptions<MailSettings> mailSettings, ILogger<EmailService> logger)
         {
             _mailSettings = mailSettings.Value;
             _logger = logger;
         }
 
-        public Task SendAsync(EmailRequestDto emailRequestDto)
+        public async Task SendAsync(EmailRequestDto emailRequestDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using var email = CreateEmailMessage(emailRequestDto);
+                await SendEmailAsync(email);
+
+                _logger.LogInformation("✅ Correo enviado exitosamente a: {Recipients}",
+                    string.Join(", ", email.To.Select(x => x.ToString())));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Error enviando correo a: {To}", emailRequestDto.To);
+                throw new ApplicationException("No se pudo enviar el correo electrónico", ex);
+            }
         }
 
-        //public async Task SendAsync(EmailRequestDto emailRequestDto)
-        //{
-        //    try
-        //    {
-        //        emailRequestDto.ToRange?.Add(emailRequestDto.To ?? "");
+        private MimeMessage CreateEmailMessage(EmailRequestDto request)
+        {
+            var email = new MimeMessage();
 
-        //        MimeMessage email = new()
-        //        {
-        //            Sender = MailboxAddress.Parse(_mailSettings.EmailFrom),
-        //            Subject = emailRequestDto.Subject
-        //        };
+            // Configurar remitente
+            email.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.EmailFrom));
+            email.Sender = MailboxAddress.Parse(_mailSettings.EmailFrom);
+            email.Subject = request.Subject;
 
-        //        foreach (var toItem in emailRequestDto.ToRange ?? [])
-        //        {
-        //            email.To.Add(MailboxAddress.Parse(toItem));
-        //        }
+            // Agregar destinatarios principales (sin duplicados)
+            var allRecipients = GetValidRecipients(request.To, request.ToRange);
+            foreach (var recipient in allRecipients)
+            {
+                email.To.Add(MailboxAddress.Parse(recipient));
+            }
 
-        //        BodyBuilder builder = new()
-        //        {
-        //            HtmlBody = emailRequestDto.HtmlBody
-        //        };
-        //        email.Body = builder.ToMessageBody();
+            // Crear cuerpo del mensaje
+            var builder = new BodyBuilder
+            {
+                HtmlBody = request.HtmlBody
+            };
 
-        //        using MailKit.Net.Smtp.SmtpClient smtpClient = new();
-        //        await smtpClient.ConnectAsync(_mailSettings.SmtpHost, _mailSettings.SmtpPort, MailKit.Security.SecureSocketOptions.StartTls);
-        //        await smtpClient.AuthenticateAsync(_mailSettings.SmtpUser, _mailSettings.SmtpPass);
-        //        await smtpClient.SendAsync(email);
-        //        await smtpClient.DisconnectAsync(true);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "An exception occured {Exception}.", ex);
-        //    }
-        //}
+            email.Body = builder.ToMessageBody();
+
+            return email;
+        }
+
+        private static List<string> GetValidRecipients(string? single, List<string>? multiple)
+        {
+            var recipients = new List<string>();
+
+            // Agregar destinatario único si es válido
+            if (!string.IsNullOrWhiteSpace(single))
+            {
+                recipients.Add(single.Trim());
+            }
+
+            // Agregar lista de destinatarios si existe
+            if (multiple != null)
+            {
+                recipients.AddRange(multiple
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => x.Trim()));
+            }
+
+            // Eliminar duplicados
+            return recipients.Distinct().ToList();
+        }
+
+        private async Task SendEmailAsync(MimeMessage email)
+        {
+            using var smtpClient = new MailKit.Net.Smtp.SmtpClient();
+
+            await smtpClient.ConnectAsync(
+                _mailSettings.SmtpHost,
+                _mailSettings.SmtpPort,
+                MailKit.Security.SecureSocketOptions.StartTls);
+
+            await smtpClient.AuthenticateAsync(_mailSettings.SmtpUser, _mailSettings.SmtpPass);
+            await smtpClient.SendAsync(email);
+            await smtpClient.DisconnectAsync(true);
+        }
     }
 }

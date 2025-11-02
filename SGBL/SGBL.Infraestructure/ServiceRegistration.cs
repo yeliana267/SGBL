@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SGBL.Application.Interfaces;
+using SGBL.Application.Services;
 using SGBL.Domain.Settings;
 using SGBL.Infraestructure;
 using SGBL.Infraestructure.Services;
@@ -18,6 +19,8 @@ namespace SGBL.Application
 
             services.AddSingleton<IServiceLogs, ServiceLogs>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IAuthService, AuthService>();
+
         }
 
     }

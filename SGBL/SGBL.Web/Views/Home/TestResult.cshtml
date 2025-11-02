@@ -1,0 +1,18 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Prueba de Email</title>
+</head>
+<body>
+    <h1>Resultado de Prueba</h1>
+    @if (ViewBag.Message != null)
+    {
+        <div style="color: green; font-weight: bold;">@ViewBag.Message</div>
+    }
+    @if (ViewBag.Error != null)
+    {
+        <div style="color: red; font-weight: bold;">@ViewBag.Error</div>
+    }
+    <a href="/">Volver al inicio</a>
+</body>
+</html>
