@@ -91,7 +91,8 @@ Estructura del Proyecto
 │
 ├── /.dockerignore
 ├── /touch
-├── SGBL.sln
-└── README.md
+├── SGBL.sln├──
+├── README.md
+└── FRONTEND_GUIDE.md
 ```
 

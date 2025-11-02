@@ -120,6 +120,9 @@ namespace SGBL.Web
                 pattern: "{controller=AuthViews}/{action=Login}/{id?}")
                 .WithStaticAssets();
 
+            //favicon
+            app.UseStaticFiles();
+
             app.Run();
         }
     }
