@@ -15,9 +15,11 @@ namespace SGBL.Domain.Entities
         public string Name { get; set; }
         [Column("biografia")]
         public string Biography { get; set; }
-        [Column("fecha_nacimiento")]
+        [Column("fecha_nacimiento", TypeName = "date")]
         public DateTime BirthDate { get; set; }
         [Column("nacionalidad")]
         public int Nationality { get; set; }
+        public virtual ICollection<BookAuthor> BookAuthors { get; set; } = new List<BookAuthor>();
+
     }
 }

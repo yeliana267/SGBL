@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SGBL.Application.Dtos.Author;
 using SGBL.Application.Dtos.Book;
 using SGBL.Application.Dtos.Loan;
 using SGBL.Application.Dtos.Nationality;
@@ -7,7 +8,7 @@ using SGBL.Application.Dtos.Reminders;
 using SGBL.Application.Dtos.Role;
 using SGBL.Application.Dtos.User;
 using SGBL.Domain.Entities;
-using System.Reflection;
+
 
 namespace SGBL.Application.Profiles
 {
@@ -34,6 +35,9 @@ namespace SGBL.Application.Profiles
             CreateMap<Genre, GenreDto>().ApplyStandardMapping();
             CreateMap<LoanStatus, LoanStatusDto>().ApplyStandardMapping();
             CreateMap<Book, BookDto>().ApplyStandardMapping();
+            CreateMap<Author, AuthorDto>().ApplyStandardMapping();
+
+            
             CreateMap<Book, BookDto>()
    .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
    .ForMember(d => d.Isbn, o => o.MapFrom(s => s.Isbn))
@@ -43,7 +47,7 @@ namespace SGBL.Application.Profiles
    .ForMember(d => d.TotalCopies, o => o.MapFrom(s => s.TotalCopies))
    .ForMember(d => d.AvailableCopies, o => o.MapFrom(s => s.AvailableCopies))
    .ForMember(d => d.Ubication, o => o.MapFrom(s => s.Ubication))
-   .ForMember(d => d.StatusId, o => o.MapFrom(s => s.Status));
+              .ForMember(d => d.StatusId, o => o.MapFrom(s => s.Status));
             // Reverse maps con configuración
             CreateMap<RoleDto, Role>().ApplyStandardReverseMapping();
             CreateMap<NationalityDto, Nationality>().ApplyStandardReverseMapping();
@@ -55,6 +59,10 @@ namespace SGBL.Application.Profiles
             CreateMap<GenreDto, Genre>().ApplyStandardReverseMapping();
             CreateMap<LoanStatusDto, LoanStatus>().ApplyStandardReverseMapping();
             CreateMap<BookDto, Book>().ApplyStandardReverseMapping();
+            CreateMap<AuthorDto, Author>().ApplyStandardReverseMapping();
+
+
+
             CreateMap<BookDto, Book>()
     .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
     .ForMember(d => d.Isbn, o => o.MapFrom(s => s.Isbn))
@@ -64,13 +72,11 @@ namespace SGBL.Application.Profiles
     .ForMember(d => d.TotalCopies, o => o.MapFrom(s => s.TotalCopies))
     .ForMember(d => d.AvailableCopies, o => o.MapFrom(s => s.AvailableCopies))
     .ForMember(d => d.Ubication, o => o.MapFrom(s => s.Ubication))
-    .ForMember(d => d.Status, o => o.MapFrom(s => s.StatusId)) // 👈 Mapea StatusId a Status
+    .ForMember(d => d.Status, o => o.MapFrom(s => s.StatusId)) 
     .ForMember(d => d.CreatedAt, o => o.Ignore())
     .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
 
         }
-        // En MappingProfile.cs
-        // 👈 Mapea Status a StatusId
 
 
         private void ApplyCustomMappings()

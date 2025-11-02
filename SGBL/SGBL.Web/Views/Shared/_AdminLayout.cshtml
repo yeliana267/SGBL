@@ -1,5 +1,24 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@if (ViewData["UserRole"]?.ToString() == "Administrador")
+{
+    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")"
+       href="@Url.Action("Dashboard", "Admin")">
+        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+    </a>
+    <!-- Agregar esta línea -->
+    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Author" ? "active" : "")"
+       href="@Url.Action("Index", "Author")">
+        <i class="fas fa-user-edit me-2"></i>Gestión de Autores
+    </a>
+    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")"
+       href="@Url.Action("Index", "User")">
+        <i class="fas fa-users me-2"></i>Gestión de Usuarios
+    </a>
+    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")"
+       href="@Url.Action("Reports", "Admin")">
+        <i class="fas fa-chart-bar me-2"></i>Reportes
+    </a>
+    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Settings" ? "active" : "")"
+       href="@Url.Action("Settings", "Admin")">
+        <i class="fas fa-cog me-2"></i>Configuración
+    </a>
 }

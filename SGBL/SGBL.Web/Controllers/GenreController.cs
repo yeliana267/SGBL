@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SGBL.Application.Dtos.Book;
 using SGBL.Application.Interfaces;
 using SGBL.Application.ViewModels;
 
 namespace SGBL.Web.Controllers
 {
+    [Authorize(Roles = "7")]
+
     public class GenreController : Controller
     {
+
         private readonly IGenreService _genreService;
 
         public GenreController(IGenreService genreService)

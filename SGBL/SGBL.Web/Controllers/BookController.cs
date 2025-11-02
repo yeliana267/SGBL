@@ -1,31 +1,34 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SGBL.Application.Dtos.Book;
 using SGBL.Application.Interfaces;
 using SGBL.Application.ViewModels;
 
 namespace SGBL.Web.Controllers
 {
+    [Authorize(Roles = "7")]
     public class BookController : Controller
     {
         private readonly IBookService _bookService;
-        private readonly IBookStatusService _bookStatusService; // 👈 Agrega este servicio
+        private readonly IBookStatusService _bookStatusService;
+        private readonly IAuthorService _authorService; // ⭐ NUEVO SERVICIO
 
-        public BookController(IBookService bookService, IBookStatusService bookStatusService)
+        public BookController(
+            IBookService bookService,
+            IBookStatusService bookStatusService,
+            IAuthorService authorService) // ⭐ AGREGAR PARÁMETRO
         {
             _bookService = bookService;
-            _bookStatusService = bookStatusService; // 👈 Inyecta el servicio
+            _bookStatusService = bookStatusService;
+            _authorService = authorService; // ⭐ INICIALIZAR
         }
-
-
-
-
 
         public async Task<IActionResult> Index(string viewAction = "index", int? id = null)
         {
             var normalizedAction = (viewAction ?? "index").ToLower();
             ViewData["Action"] = normalizedAction;
 
-            // 👇 CARGAR ESTADOS DISPONIBLES PARA TODOS LOS CASOS
+            // CARGAR ESTADOS DISPONIBLES PARA TODOS LOS CASOS
             var statusDtos = await _bookStatusService.GetAll();
             var availableStatuses = statusDtos.Select(s => new BookStatusViewModel
             {
@@ -33,10 +36,22 @@ namespace SGBL.Web.Controllers
                 Name = s.Name
             }).ToList();
 
+            // ⭐ CARGAR AUTORES DISPONIBLES PARA TODOS LOS CASOS
+            var authorDtos = await _authorService.GetAll();
+            var availableAuthors = authorDtos.Select(a => new AuthorViewModel
+            {
+                Id = a.Id,
+                Name = a.Name
+            }).ToList();
+
             switch (normalizedAction)
             {
                 case "create":
-                    var createVm = new BookViewModel { AvailableStatuses = availableStatuses };
+                    var createVm = new BookViewModel
+                    {
+                        AvailableStatuses = availableStatuses,
+                        AvailableAuthors = availableAuthors // ⭐ AGREGAR AUTORES
+                    };
                     return View(createVm);
 
                 case "edit":
@@ -48,6 +63,20 @@ namespace SGBL.Web.Controllers
 
                     var vm = MapToVm(dto);
                     vm.AvailableStatuses = availableStatuses;
+                    vm.AvailableAuthors = availableAuthors; // ⭐ AGREGAR AUTORES
+
+                    // ⭐ CARGAR AUTORES ACTUALES DEL LIBRO
+                    if (id.HasValue && (normalizedAction == "edit" || normalizedAction == "details"))
+                    {
+                        var bookAuthors = await _bookService.GetBookAuthors(id.Value);
+                        vm.CurrentAuthors = bookAuthors.Select(a => new AuthorViewModel
+                        {
+                            Id = a.Id,
+                            Name = a.Name
+                        }).ToList();
+                        vm.SelectedAuthorIds = bookAuthors.Select(a => a.Id).ToList();
+                    }
+
                     return View(vm);
 
                 case "index":
@@ -55,18 +84,27 @@ namespace SGBL.Web.Controllers
                     var dtos = await _bookService.GetAll();
                     var bookList = dtos.Select(MapToVm).ToList();
 
-                    // 👇 ASIGNAR LOS ESTADOS A CADA LIBRO EN EL LISTADO
+                    // ASIGNAR LOS ESTADOS Y AUTORES A CADA LIBRO EN EL LISTADO
                     foreach (var book in bookList)
                     {
                         book.AvailableStatuses = availableStatuses;
+                        // ⭐ CARGAR AUTORES PARA CADA LIBRO EN EL LISTADO
+                        var bookAuthors = await _bookService.GetBookAuthors(book.Id);
+                        book.CurrentAuthors = bookAuthors.Select(a => new AuthorViewModel
+                        {
+                            Id = a.Id,
+                            Name = a.Name
+                        }).ToList();
                     }
 
                     ViewData["BookList"] = bookList;
-                    return View(new BookViewModel { AvailableStatuses = availableStatuses });
+                    return View(new BookViewModel
+                    {
+                        AvailableStatuses = availableStatuses,
+                        AvailableAuthors = availableAuthors // ⭐ AGREGAR AUTORES
+                    });
             }
         }
-
-       
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -83,6 +121,14 @@ namespace SGBL.Web.Controllers
                 Name = s.Name
             }).ToList();
 
+            // ⭐ CARGAR AUTORES DISPONIBLES EN CASO DE ERROR
+            var authorDtos = await _authorService.GetAll();
+            vm.AvailableAuthors = authorDtos.Select(a => new AuthorViewModel
+            {
+                Id = a.Id,
+                Name = a.Name
+            }).ToList();
+
             if (!ModelState.IsValid && normalizedAction != "delete")
             {
                 return View(vm);
@@ -94,11 +140,30 @@ namespace SGBL.Web.Controllers
                 {
                     case "create":
                         var created = await _bookService.AddAsync(MapToDto(vm));
+
+                        // ⭐ GUARDAR LAS RELACIONES CON AUTORES
+                        if (vm.SelectedAuthorIds != null && vm.SelectedAuthorIds.Any())
+                        {
+                            await _bookService.AddAuthorsToBook(created.Id, vm.SelectedAuthorIds);
+                        }
+
                         TempData["success"] = $"Libro '{created?.Title}' creado correctamente.";
                         break;
 
                     case "edit":
                         var updated = await _bookService.UpdateAsync(MapToDto(vm), vm.Id);
+
+                        // ⭐ ACTUALIZAR LAS RELACIONES CON AUTORES
+                        if (vm.SelectedAuthorIds != null && vm.SelectedAuthorIds.Any())
+                        {
+                            await _bookService.UpdateBookAuthors(vm.Id, vm.SelectedAuthorIds);
+                        }
+                        else
+                        {
+                            // Si no se seleccionaron autores, eliminar relaciones existentes
+                            await _bookService.UpdateBookAuthors(vm.Id, new List<int>());
+                        }
+
                         TempData["success"] = $"Libro '{updated?.Title}' actualizado correctamente.";
                         break;
 
@@ -133,7 +198,7 @@ namespace SGBL.Web.Controllers
             TotalCopies = dto.TotalCopies,
             AvailableCopies = dto.AvailableCopies,
             Ubication = dto.Ubication,
-            StatusId = dto.StatusId, // 👈 Usa StatusId
+            StatusId = dto.StatusId,
             CreatedAt = dto.CreatedAt,
             UpdatedAt = dto.UpdatedAt
         };
@@ -149,7 +214,7 @@ namespace SGBL.Web.Controllers
             TotalCopies = vm.TotalCopies,
             AvailableCopies = vm.AvailableCopies,
             Ubication = vm.Ubication,
-            StatusId = vm.StatusId // 👈 Usa StatusId
+            StatusId = vm.StatusId
         };
     }
 }

@@ -1,14 +1,12 @@
-﻿using Xunit;
+﻿using AutoMapper;
 using Moq;
-using AutoMapper;
+using SGBL.Application.Dtos.Author;
 using SGBL.Application.Dtos.Book;
+using SGBL.Application.Interfaces;
 using SGBL.Application.Services;
 using SGBL.Domain.Entities;
 using SGBL.Domain.Interfaces;
-using SGBL.Application.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace SGBL.Application.Tests.Services
 {
@@ -17,6 +15,7 @@ namespace SGBL.Application.Tests.Services
         private readonly Mock<IBookRepository> _mockBookRepository;
         private readonly Mock<IMapper> _mockMapper;
         private readonly Mock<IServiceLogs> _mockServiceLogs;
+        private readonly Mock<IBookAuthorRepository> _mockBookAuthorRepository;
         private readonly BookService _bookService;
 
         public BookServiceTests()
@@ -24,7 +23,14 @@ namespace SGBL.Application.Tests.Services
             _mockBookRepository = new Mock<IBookRepository>();
             _mockMapper = new Mock<IMapper>();
             _mockServiceLogs = new Mock<IServiceLogs>();
-            _bookService = new BookService(_mockBookRepository.Object, _mockMapper.Object, _mockServiceLogs.Object);
+            _mockBookAuthorRepository = new Mock<IBookAuthorRepository>(); // ⭐ NUEVO MOCK
+
+            _bookService = new BookService(
+                _mockBookRepository.Object,
+                _mockMapper.Object,
+                _mockServiceLogs.Object,
+                _mockBookAuthorRepository.Object // ⭐ AGREGAR ESTE PARÁMETRO
+            );
         }
 
         [Fact]
@@ -101,6 +107,79 @@ namespace SGBL.Application.Tests.Services
             Xunit.Assert.NotNull(result);
             Xunit.Assert.Equal(1, result.Id);
             Xunit.Assert.Equal("Test Book", result.Title);
+        }
+
+        [Fact]
+        public async Task AddAuthorsToBook_Should_Call_Repository()
+        {
+            // Arrange
+            var bookId = 1;
+            var authorIds = new List<int> { 1, 2, 3 };
+
+            _mockBookAuthorRepository.Setup(r => r.AddRangeAsync(It.IsAny<IEnumerable<BookAuthor>>()))
+                                   .Returns(Task.CompletedTask);
+
+            // Act
+            await _bookService.AddAuthorsToBook(bookId, authorIds);
+
+            // Assert
+            _mockBookAuthorRepository.Verify(
+                r => r.AddRangeAsync(It.IsAny<IEnumerable<BookAuthor>>()),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task UpdateBookAuthors_Should_Remove_And_Add()
+        {
+            // Arrange
+            var bookId = 1;
+            var authorIds = new List<int> { 1, 2, 3 };
+
+            _mockBookAuthorRepository.Setup(r => r.RemoveByBookIdAsync(bookId))
+                                   .ReturnsAsync(true);
+            _mockBookAuthorRepository.Setup(r => r.AddRangeAsync(It.IsAny<IEnumerable<BookAuthor>>()))
+                                   .Returns(Task.CompletedTask);
+
+            // Act
+            await _bookService.UpdateBookAuthors(bookId, authorIds);
+
+            // Assert
+            _mockBookAuthorRepository.Verify(r => r.RemoveByBookIdAsync(bookId), Times.Once);
+            _mockBookAuthorRepository.Verify(r => r.AddRangeAsync(It.IsAny<IEnumerable<BookAuthor>>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetBookAuthors_Should_Return_Authors()
+        {
+            // Arrange
+            var bookId = 1;
+            var bookAuthors = new List<BookAuthor>
+            {
+                new BookAuthor { IdBook = 1, IdAuthor = 1, Author = new Author { Id = 1, Name = "Author 1" } },
+                new BookAuthor { IdBook = 1, IdAuthor = 2, Author = new Author { Id = 2, Name = "Author 2" } }
+            };
+
+            _mockBookAuthorRepository.Setup(r => r.GetByBookIdAsync(bookId))
+                                   .ReturnsAsync(bookAuthors);
+
+            var authorDtos = new List<AuthorDto>
+            {
+                new AuthorDto { Id = 1, Name = "Author 1" },
+                new AuthorDto { Id = 2, Name = "Author 2" }
+            };
+
+            _mockMapper.Setup(m => m.Map<List<AuthorDto>>(It.IsAny<IEnumerable<Author>>()))
+                      .Returns(authorDtos);
+
+            // Act
+            var result = await _bookService.GetBookAuthors(bookId);
+
+            // Assert
+            Xunit.Assert.NotNull(result);
+            Xunit.Assert.Equal(2, result.Count);
+            Xunit.Assert.Contains(result, a => a.Name == "Author 1");
+            Xunit.Assert.Contains(result, a => a.Name == "Author 2");
         }
     }
 }

@@ -114,7 +114,7 @@ namespace SGBL.Web
             app.MapControllers();
             app.MapStaticAssets();
 
-            //  RUTA PRINCIPAL COMO LOGIN
+       
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=AuthViews}/{action=Login}/{id?}")

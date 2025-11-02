@@ -4,7 +4,6 @@ namespace SGBL.Application.ViewModels
 {
     public class BookViewModel : BaseViewModel<int>
     {
-        public override int Id { get; set; }
 
         [Required(ErrorMessage = "El título es requerido")]
         [StringLength(200, ErrorMessage = "El título no puede exceder 200 caracteres")]
@@ -39,9 +38,12 @@ namespace SGBL.Application.ViewModels
 
         [Required(ErrorMessage = "El estado es requerido")]
         [Display(Name = "Estado")]
-        public int StatusId { get; set; } // 👈 Cambia a StatusId
+        public int StatusId { get; set; }
 
         // Propiedad para mostrar los estados disponibles
         public List<BookStatusViewModel>? AvailableStatuses { get; set; }
+        public List<int> SelectedAuthorIds { get; set; } = new List<int>();
+        public List<AuthorViewModel> AvailableAuthors { get; set; } = new List<AuthorViewModel>();
+        public List<AuthorViewModel> CurrentAuthors { get; set; } = new List<AuthorViewModel>();
     }
 }

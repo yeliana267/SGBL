@@ -1,6 +1,4 @@
-﻿
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using SGBL.Domain.Base;
 
@@ -12,9 +10,17 @@ namespace SGBL.Domain.Entities
         [Column("idlibroautor")]
         [Key]
         public override int Id { get; set; }
+
         [Column("idlibro")]
         public int IdBook { get; set; }
+
         [Column("idautor")]
         public int IdAuthor { get; set; }
+
+        [ForeignKey("IdBook")]
+        public virtual Book Book { get; set; }
+
+        [ForeignKey("IdAuthor")]
+        public virtual Author Author { get; set; }
     }
 }

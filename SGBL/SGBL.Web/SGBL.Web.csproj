@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <Folder Include="Views\Admin\Settings\" />
-    <Folder Include="Views\Admin\Reports\" />
+    <Folder Include="Views\Reports\" />
     <Folder Include="Views\Bibliotecario\LoanManagement\" />
     <Folder Include="Views\Bibliotecario\BookManagement\" />
     <Folder Include="Views\Bibliotecario\Returns\" />

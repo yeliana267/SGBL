@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using SGBL.Application.Dtos.Role;
 using SGBL.Application.Interfaces;
@@ -7,6 +8,7 @@ using System.Diagnostics;
 
 namespace SGBL.Web.Controllers
 {
+    [Authorize(Roles = "7")]
     public class RolesController : Controller
     {
             private readonly IRoleService _roles;

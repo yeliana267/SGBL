@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SGBL.Web.Controllers
 {
-    [Authorize(Roles = "8")] // Solo usuarios con rol 3 (Bibliotecario) pueden acceder
+    [Authorize(Roles = "7,8")] // ✅ Solo usuarios con rol 7 (Admin) O 8 (Bibliotecario)
     public class BibliotecarioController : BaseController
     {
         private readonly ILogger<BibliotecarioController> _logger;

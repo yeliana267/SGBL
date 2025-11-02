@@ -10,6 +10,6 @@
         public int TotalCopies { get; set; }
         public int AvailableCopies { get; set; }
         public string Ubication { get; set; } = string.Empty;
-        public int StatusId { get; set; } // 👈 Cambia a StatusId
+        public int StatusId { get; set; } 
     }
 }

@@ -29,6 +29,8 @@ namespace SGBL.Domain.Entities
         public string Ubication { get; set; }
         [Column("estado")]
         public int Status { get; set; }
+        public virtual ICollection<BookAuthor> BookAuthors { get; set; } = new List<BookAuthor>();
+
 
     }
 }
