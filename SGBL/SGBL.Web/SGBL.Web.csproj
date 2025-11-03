@@ -34,4 +34,8 @@
     <Folder Include="Views\UserDashboard\MyLoans\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\lib\img\logo library.jpg" />
+  </ItemGroup>
+
 </Project>
