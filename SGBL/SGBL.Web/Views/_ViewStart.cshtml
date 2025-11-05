@@ -1,3 +1,12 @@
 ﻿@{
-    Layout = "_Layout";
+    // No aplicar layout por defecto a las vistas de autenticación
+    var controller = ViewContext.RouteData.Values["Controller"]?.ToString();
+    if (controller == "AuthViews")
+    {
+        Layout = null;
+    }
+    else
+    {
+        Layout = "_Layout";
+    }
 }

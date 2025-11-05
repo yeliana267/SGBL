@@ -3,8 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGBL.Application.ViewModels
 {
-    public class UserStatusViewModel : BaseViewModel
+    public class UserStatusViewModel : BaseViewModel<int>
     {
+
         [Required]
         [MaxLength(20)]
         public string Name { get; set; } = default!;

@@ -1,182 +1,174 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.OutputCaching;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SGBL.Application.Dtos.User;
 using SGBL.Application.Interfaces;
 using SGBL.Application.ViewModels;
-using System.Diagnostics;
 
 namespace SGBL.Web.Controllers
 {
+    [Authorize(Roles = "7")]
     public class UserController : Controller
     {
-        private readonly IUserService _users;
-        private readonly IRoleService _roles;
-        private readonly IUserStatusService _statuses;
 
-        public UserController(IUserService users, IRoleService roles, IUserStatusService statuses)
+        private readonly IUserService _userService;
+        private readonly IRoleService _roleService;
+        private readonly IUserStatusService _userStatusService;
+
+        public UserController(IUserService userService, IRoleService roleService, IUserStatusService userStatusService)
         {
-            _users = users;
-            _roles = roles;
-            _statuses = statuses;
+            _userService = userService;
+            _roleService = roleService;
+            _userStatusService = userStatusService;
         }
 
-        // LISTADO
+        // GET: /User/Index
         [HttpGet]
-        [OutputCache(Duration = 30)]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string viewAction = "index", int? id = null)
         {
-            var dtos = await _users.GetAll();
-            var vms = dtos.Select(MapToVm).ToList();
-            return View(vms);
+            var normalizedAction = (viewAction ?? "index").ToLower();
+            ViewData["Action"] = normalizedAction;
+
+            // Cargar roles y estados disponibles
+            var roleDtos = await _roleService.GetAll();
+            var statusDtos = await _userStatusService.GetAll();
+
+            var availableRoles = roleDtos.Select(r => new RoleViewModel
+            {
+                Id = r.Id,
+                Name = r.Name
+            }).ToList();
+
+            var availableStatuses = statusDtos.Select(s => new UserStatusViewModel
+            {
+                Id = s.Id,
+                Name = s.Name
+            }).ToList();
+
+            switch (normalizedAction)
+            {
+                case "create":
+                    var createVm = new UserViewModel
+                    {
+                        AvailableRoles = availableRoles,
+                        AvailableStatuses = availableStatuses
+                    };
+                    return View(createVm);
+
+                case "edit":
+                case "delete":
+                case "details":
+                    if (!id.HasValue) return BadRequest();
+                    var dto = await _userService.GetById(id.Value);
+                    if (dto is null) return NotFound();
+
+                    var vm = MapToVm(dto);
+                    vm.AvailableRoles = availableRoles;
+                    vm.AvailableStatuses = availableStatuses;
+                    return View(vm);
+
+                case "index":
+                default:
+                    var dtos = await _userService.GetAll();
+                    var userList = dtos.Select(MapToVm).ToList();
+
+                    // Asignar roles y estados a cada usuario en el listado
+                    foreach (var user in userList)
+                    {
+                        user.AvailableRoles = availableRoles;
+                        user.AvailableStatuses = availableStatuses;
+                    }
+
+                    ViewData["UserList"] = userList;
+                    return View(new UserViewModel
+                    {
+                        AvailableRoles = availableRoles,
+                        AvailableStatuses = availableStatuses
+                    });
+            }
         }
 
-        // DETALLE
-        [HttpGet]
-        public async Task<IActionResult> Details(int id)
-        {
-            var dto = await _users.GetById(id);
-            if (dto is null) return NotFound();
-            return View(MapToVm(dto));
-        }
-
-        // CREAR (GET)
-        [HttpGet]
-        public async Task<IActionResult> Create()
-        {
-            var roles = await _roles.GetAll();
-            var statuses = await _statuses.GetAll();
-
-            ViewBag.Roles = new SelectList(roles, "Id", "Name");
-            ViewBag.Statuses = new SelectList(statuses, "Id", "Name");
-
-            return View(new UserViewModel());
-        }
-
-        // CREAR (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(UserViewModel vm)
+        public async Task<IActionResult> Index(string viewAction, UserViewModel vm)
         {
-            if (!ModelState.IsValid) return View(vm);
+            var normalizedAction = (viewAction ?? "").ToLower();
+            ViewData["Action"] = normalizedAction;
+
+            // Cargar roles y estados en caso de error
+            var roleDtos = await _roleService.GetAll();
+            var statusDtos = await _userStatusService.GetAll();
+
+            vm.AvailableRoles = roleDtos.Select(r => new RoleViewModel
+            {
+                Id = r.Id,
+                Name = r.Name
+            }).ToList();
+
+            vm.AvailableStatuses = statusDtos.Select(s => new UserStatusViewModel
+            {
+                Id = s.Id,
+                Name = s.Name
+            }).ToList();
+
+            if (!ModelState.IsValid && normalizedAction != "delete")
+            {
+                return View(vm);
+            }
 
             try
             {
-                var created = await _users.AddAsync(MapToDto(vm));
-                TempData["ok"] = $"User '{created?.Name}' creado correctamente.";
+                switch (normalizedAction)
+                {
+                    case "create":
+                        var created = await _userService.AddAsync(MapToDto(vm));
+                        TempData["success"] = $"Usuario '{created?.Name}' creado correctamente.";
+                        break;
+
+                    case "edit":
+                        // Manejar password si está vacío
+                        if (string.IsNullOrWhiteSpace(vm.Password))
+                        {
+                            var existingUser = await _userService.GetById(vm.Id);
+                            if (existingUser != null)
+                            {
+                                vm.Password = existingUser.Password; // Mantener password actual
+                            }
+                        }
+
+                        var updated = await _userService.UpdateAsync(MapToDto(vm), vm.Id);
+                        TempData["success"] = $"Usuario '{updated?.Name}' actualizado correctamente.";
+                        break;
+
+                    case "delete":
+                        await _userService.DeleteAsync(vm.Id);
+                        TempData["success"] = "Usuario eliminado correctamente.";
+                        break;
+
+                    default:
+                        TempData["error"] = "Acción no válida";
+                        return RedirectToAction(nameof(Index));
+                }
+
                 return RedirectToAction(nameof(Index));
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
+                ViewData["Action"] = normalizedAction;
                 return View(vm);
             }
         }
 
-
-        // Carga las listas para los <select>
-        private async Task LoadListsAsync(int? role = null, int? status = null)
-        {
-            var roles = await _roles.GetAll();
-            var statuses = await _statuses.GetAll();
-            ViewBag.Roles = new SelectList(roles, "Id", "Name", role);
-            ViewBag.Statuses = new SelectList(statuses, "Id", "Name", status);
-        }
-
-
-
-        // EDITAR (GET)
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var dto = await _users.GetById(id);
-            if (dto is null) return NotFound();
-
-            var roles = await _roles.GetAll();
-            var statuses = await _statuses.GetAll();
-
-            ViewBag.Roles = new SelectList(roles, "Id", "Name", dto.Role);
-            ViewBag.Statuses = new SelectList(statuses, "Id", "Name", dto.Status);
-
-            return View(MapToVm(dto));
-        }
-
-        // EDITAR (POST)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UserViewModel vm)
-        {
-            if (id != vm.Id) return BadRequest();
-
-            if (!ModelState.IsValid)
-            {
-                var roles = await _roles.GetAll();
-                var statuses = await _statuses.GetAll();
-                ViewBag.Roles = new SelectList(roles, "Id", "Name", vm.Role);
-                ViewBag.Statuses = new SelectList(statuses, "Id", "Name", vm.Status);
-                return View(vm);
-            }
-
-            try
-            {
-                var existing = await _users.GetById(id); // <-- método que devuelva Password (hash)
-                if (existing is null) return NotFound();
-                var dto = MapToDto(vm);
-
-                // Si no mandan password nuevo, conserva el actual
-                if (string.IsNullOrWhiteSpace(dto.Password))
-                    dto.Password = existing.Password; // el hash actual
-            
-                var updated = await _users.UpdateAsync(MapToDto(vm), id); // o MapToUpdateDto(vm) si usas DTO específico
-                if (updated is null) return NotFound();
-
-                TempData["ok"] = $"Usuario '{updated.Name}' actualizado.";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (InvalidOperationException ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-
-                // Recargar listas para redisplay
-                var roles = await _roles.GetAll();
-                var statuses = await _statuses.GetAll();
-                ViewBag.Roles = new SelectList(roles, "Id", "Name", vm.Role);
-                ViewBag.Statuses = new SelectList(statuses, "Id", "Name", vm.Status);
-
-                return View(vm);
-            }
-        }
-
-
-        // ELIMINAR (GET)
-        [HttpGet]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var dto = await _users.GetById(id);
-            if (dto is null) return NotFound();
-            return View(MapToVm(dto));
-        }
-
-        // ELIMINAR (POST)
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await _users.DeleteAsync(id);
-            TempData["ok"] = "Usuario eliminado.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ------------------ Helpers de mapeo ------------------
-    
         private static UserViewModel MapToVm(UserDto dto) => new()
         {
-            Id =dto.Id,
+            Id = dto.Id,
             Name = dto.Name,
             Email = dto.Email,
-            Password = dto.Password, // si luego vas a hashear, se hace en el servicio
+            Password = dto.Password,
             Role = dto.Role,
-            Status = dto.Status
+            Status = dto.Status,
+            CreatedAt = dto.CreatedAt,
+            UpdatedAt = dto.UpdatedAt
         };
 
         private static UserDto MapToDto(UserViewModel vm) => new()
@@ -184,9 +176,9 @@ namespace SGBL.Web.Controllers
             Id = vm.Id,
             Name = vm.Name,
             Email = vm.Email,
+            Password = vm.Password,
             Role = vm.Role,
-            Status = vm.Status,
-            Password = vm.Password // si luego vas a hashear, se hace en el servicio
+            Status = vm.Status
         };
     }
 }

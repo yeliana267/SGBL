@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGBL.Application.ViewModels
 {
-    public class NotificationTypeViewModel : BaseViewModel
+    public class NotificationTypeViewModel : BaseViewModel<int>
     {
         [StringLength(50)]
         [Required]

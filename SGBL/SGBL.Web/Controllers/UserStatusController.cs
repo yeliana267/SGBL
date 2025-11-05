@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using SGBL.Application.Dtos.User;
 using SGBL.Application.Interfaces;
@@ -8,6 +9,7 @@ using System.Diagnostics;
 
 namespace SGBL.Web.Controllers
 {
+    [Authorize(Roles = "7")]
     public class UserStatusController : Controller
     {
         private readonly IUserStatusService _userStatusService;

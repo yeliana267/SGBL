@@ -1,33 +1,26 @@
 using Microsoft.AspNetCore.Mvc;
-using SGBL.Web.Models;
-using System.Diagnostics;
 
 namespace SGBL.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
         public IActionResult Index()
         {
-            return View();
-        }
+            // Si está autenticado, redirigir al dashboard según su rol
+            if (User.Identity.IsAuthenticated)
+            {
+                var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                return role switch
+                {
+                    "7" => RedirectToAction("Dashboard", "Admin"),
+                    "9" => RedirectToAction("Dashboard", "UserDashboard"),
+                    "8" => RedirectToAction("Dashboard", "Bibliotecario"),
+                    _ => RedirectToAction("Login", "AuthViews")
+                };
+            }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-     
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            // Si no está autenticado, redirigir al login
+            return RedirectToAction("Login", "AuthViews");
         }
     }
 }

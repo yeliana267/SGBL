@@ -1,39 +1,172 @@
-﻿@model List<SGBL.Application.ViewModels.BookStatusViewModel>
+﻿@model SGBL.Application.ViewModels.BookStatusViewModel
 @{
-    ViewData["Title"] = "Listado de Estados";
+    ViewData["Title"] = "Gestión de Estados de Libros";
+    var action = ViewData["Action"] as string ?? "index";
+    var bookStatusList = ViewData["BookStatusList"] as List<SGBL.Application.ViewModels.BookStatusViewModel> ?? new();
 }
 
-<h2 class="mt-3">Estados</h2> 
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            @(action == "create" ? "Crear Estado" :
+                        action == "edit" ? "Editar Estado" :
+                        action == "delete" ? "Eliminar Estado" :
+                        action == "details" ? "Detalles del Estado" :
+                        "Estados de Libros")
+        </h2>
 
-@if (TempData["ok"] != null)
-{
-    <div class="alert alert-success">@TempData["ok"]</div>
-}
-
-<p>
-    <a asp-action="Create" class="btn btn-primary">➕ Nuevo Estado</a>
-</p>
-
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var estado in Model)
+        @if (action == "index")
         {
-            <tr>
-                <td>@estado.Id</td>
-                <td>@estado.Name</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@estado.Id" class="btn btn-warning btn-sm">Editar</a>
-                    <a asp-action="Details" asp-route-id="@estado.Id" class="btn btn-info btn-sm">Ver</a>
-                    <a asp-action="Delete" asp-route-id="@estado.Id" class="btn btn-danger btn-sm">Eliminar</a>
-                </td>
-            </tr>
+            <!-- CAMBIA: action → viewAction -->
+            <a href="@Url.Action("Index", new { viewAction = "create" })" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Nuevo Estado
+            </a>
         }
-    </tbody>
-</table>
+        else
+        {
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        }
+    </div>
+
+    <!-- Mensajes -->
+    @if (TempData["success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Contenido Dinámico -->
+    @if (action == "index")
+    {
+        <!-- Listado -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                @if (bookStatusList.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var estado in bookStatusList)
+                                {
+                                    <tr>
+                                        <td>@estado.Id</td>
+                                        <td>@estado.Name</td>
+                                        <td class="text-center">
+                                            <!-- CAMBIA: action → viewAction -->
+                                            <a href="@Url.Action("Index", new { viewAction = "edit", id = estado.Id })"
+                                               class="btn btn-warning btn-sm">Editar</a>
+                                            <a href="@Url.Action("Index", new { viewAction = "details", id = estado.Id })"
+                                               class="btn btn-info btn-sm">Ver</a>
+                                            <a href="@Url.Action("Index", new { viewAction = "delete", id = estado.Id })"
+                                               class="btn btn-danger btn-sm">Eliminar</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <h4>No hay estados registrados</h4>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (action == "create" || action == "edit")
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="post" action="@Url.Action("Index")">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="viewAction" value="@action" />
+
+                    <!-- SOLO enviar ID en edición -->
+                    @if (action == "edit")
+                    {
+                        <input type="hidden" asp-for="Id" />
+                    }
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">Nombre</label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        @(action == "edit" ? "Actualizar" : "Guardar")
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    }
+    else if (action == "delete")
+    {
+        <!-- Confirmar Eliminación -->
+        <div class="card shadow-sm border-danger">
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>¿Estás seguro?</strong> Esta acción no se puede deshacer.
+                </div>
+
+                <dl class="row">
+                    <dt class="col-sm-2">ID:</dt>
+                    <dd class="col-sm-10">@Model.Id</dd>
+                    <dt class="col-sm-2">Nombre:</dt>
+                    <dd class="col-sm-10">@Model.Name</dd>
+                </dl>
+
+                <form method="post" action="@Url.Action("Index")">
+                    @Html.AntiForgeryToken()
+
+                    <!-- CAMBIA: name="action" → name="viewAction" -->
+                    <input type="hidden" name="viewAction" value="@action" />
+                    <input type="hidden" asp-for="Id" />
+
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    }
+    else if (action == "details")
+    {
+        <!-- Detalles -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-2">ID:</dt>
+                    <dd class="col-sm-10">@Model.Id</dd>
+                    <dt class="col-sm-2">Nombre:</dt>
+                    <dd class="col-sm-10">@Model.Name</dd>
+                </dl>
+
+                <!-- CAMBIA: action → viewAction -->
+                <a href="@Url.Action("Index", new { viewAction = "edit", id = Model.Id })"
+                   class="btn btn-warning">Editar</a>
+                <a href="@Url.Action("Index")" class="btn btn-secondary">Volver</a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

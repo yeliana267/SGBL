@@ -1,6 +1,5 @@
-﻿
-
-using System.Reflection;
+﻿using System.Reflection;
+using Application.Interfaces.Services;
 using Microsoft.Extensions.DependencyInjection;
 using SGBL.Application.Interfaces;
 using SGBL.Application.Services;
@@ -21,6 +20,13 @@ namespace SGBL.Application
             services.AddScoped<IReminderStatusService, ReminderStatusService>();
             services.AddScoped<INotificationStatusService, NotificationStatusService>();
             services.AddScoped<INotificationTypeService, NotificationTypeService>();
+            services.AddScoped<ILoanStatusService, LoanStatusService>();
+            services.AddScoped<IGenreService, GenreService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IAuthorService, AuthorService>();
+
+
+
         }
 
     }

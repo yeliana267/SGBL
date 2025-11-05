@@ -1,0 +1,370 @@
+﻿@model SGBL.Application.ViewModels.BookViewModel
+@{
+    ViewData["Title"] = "Gestión de Libros";
+    var action = ViewData["Action"] as string ?? "index";
+    var bookList = ViewData["BookList"] as List<SGBL.Application.ViewModels.BookViewModel> ?? new();
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            @(action == "create" ? "Crear Libro" :
+                        action == "edit" ? "Editar Libro" :
+                        action == "delete" ? "Eliminar Libro" :
+                        action == "details" ? "Detalles del Libro" :
+                        "Libros")
+        </h2>
+
+        @if (action == "index")
+        {
+            <a href="@Url.Action("Index", new { viewAction = "create" })" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Nuevo Libro
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        }
+    </div>
+
+    <!-- Mensajes -->
+    @if (TempData["success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Contenido Dinámico -->
+    @if (action == "index")
+    {
+        <!-- Listado -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                @if (bookList.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>ISBN</th>
+                                    <th>Autores</th>
+                                    <th>Año</th>
+                                    <th>Copias</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var libro in bookList)
+                                {
+                                    <tr>
+                                        <td>@libro.Id</td>
+                                        <td>@libro.Title</td>
+                                        <td>@libro.Isbn</td>
+                                        <td>
+                                            @if (libro.CurrentAuthors != null && libro.CurrentAuthors.Any())
+                                            {
+                                                @string.Join(", ", libro.CurrentAuthors.Take(2).Select(a => a.Name))
+                                                @if (libro.CurrentAuthors.Count > 2)
+                                                {
+                                                    <span class="text-muted"> y @(libro.CurrentAuthors.Count - 2) más</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sin autores</span>
+                                            }
+                                        </td>
+                                        <td>@libro.PublicationYear</td>
+                                        <td>@libro.AvailableCopies/@libro.TotalCopies</td>
+                                        <td>
+                                            @{
+                                                var estadoNombre = libro.AvailableStatuses?
+                                                .FirstOrDefault(s => s.Id == libro.StatusId)?.Name
+                                                ?? "No especificado";
+                                            }
+                                            @estadoNombre
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="@Url.Action("Index", new { viewAction = "edit", id = libro.Id })"
+                                               class="btn btn-warning btn-sm">Editar</a>
+                                            <a href="@Url.Action("Index", new { viewAction = "details", id = libro.Id })"
+                                               class="btn btn-info btn-sm">Ver</a>
+                                            <a href="@Url.Action("Index", new { viewAction = "delete", id = libro.Id })"
+                                               class="btn btn-danger btn-sm">Eliminar</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-book fa-3x mb-3"></i>
+                        <h4>No hay libros registrados</h4>
+                        <p>Comienza agregando un nuevo libro al catálogo.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (action == "create" || action == "edit")
+    {
+        <!-- Formulario Crear/Editar -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="post" action="@Url.Action("Index")">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="viewAction" value="@action" />
+
+                    @if (action == "edit")
+                    {
+                        <input type="hidden" asp-for="Id" />
+                    }
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Title" class="form-label">Título *</label>
+                                <input asp-for="Title" class="form-control" placeholder="Ingrese el título del libro" />
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Isbn" class="form-label">ISBN *</label>
+                                <input asp-for="Isbn" type="number" class="form-control" placeholder="13 dígitos" />
+                                <span asp-validation-for="Isbn" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Descripción</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Descripción del libro"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label asp-for="PublicationYear" class="form-label">Año Publicación *</label>
+                                <input asp-for="PublicationYear" type="number" class="form-control" />
+                                <span asp-validation-for="PublicationYear" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label asp-for="Pages" class="form-label">Páginas *</label>
+                                <input asp-for="Pages" type="number" class="form-control" />
+                                <span asp-validation-for="Pages" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label asp-for="TotalCopies" class="form-label">Total Copias *</label>
+                                <input asp-for="TotalCopies" type="number" class="form-control" />
+                                <span asp-validation-for="TotalCopies" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label asp-for="AvailableCopies" class="form-label">Copias Disponibles *</label>
+                                <input asp-for="AvailableCopies" type="number" class="form-control" />
+                                <span asp-validation-for="AvailableCopies" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Ubication" class="form-label">Ubicación *</label>
+                                <input asp-for="Ubication" class="form-control" placeholder="Ej: Estante A-12" />
+                                <span asp-validation-for="Ubication" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="StatusId" class="form-label">Estado *</label>
+                                <select asp-for="StatusId" asp-items="@(new SelectList(Model.AvailableStatuses ?? new List<SGBL.Application.ViewModels.BookStatusViewModel>(), "Id", "Name"))" class="form-control">
+                                    <option value="">Seleccione un estado</option>
+                                </select>
+                                <span asp-validation-for="StatusId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN DE AUTORES -->
+                    <div class="mb-3">
+                        <label asp-for="SelectedAuthorIds" class="form-label">Autores *</label>
+                        <select asp-for="SelectedAuthorIds" class="form-control" multiple="multiple"
+                                asp-items="@(new SelectList(Model.AvailableAuthors ?? new List<SGBL.Application.ViewModels.AuthorViewModel>(), "Id", "Name"))">
+                        </select>
+                        <small class="text-muted">Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples autores (máximo 3)</small>
+                        <span asp-validation-for="SelectedAuthorIds" class="text-danger"></span>
+
+                        <!-- Mostrar autores actuales en modo edición -->
+                        @if (action == "edit" && Model.CurrentAuthors != null && Model.CurrentAuthors.Any())
+                        {
+                            <div class="mt-2">
+                                <small class="text-success">
+                                    <strong>Autores actuales:</strong>
+                                    @string.Join(", ", Model.CurrentAuthors.Select(a => a.Name))
+                                </small>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            @(action == "edit" ? "Actualizar" : "Guardar")
+                        </button>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    else if (action == "delete")
+    {
+        <!-- Confirmar Eliminación -->
+        <div class="card shadow-sm border-danger">
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>¿Estás seguro de eliminar este libro?</strong><br />
+                    Esta acción no se puede deshacer.
+                </div>
+
+                <dl class="row">
+                    <dt class="col-sm-3">ID:</dt>
+                    <dd class="col-sm-9">@Model.Id</dd>
+                    <dt class="col-sm-3">Título:</dt>
+                    <dd class="col-sm-9">@Model.Title</dd>
+                    <dt class="col-sm-3">ISBN:</dt>
+                    <dd class="col-sm-9">@Model.Isbn</dd>
+                    <dt class="col-sm-3">Autores:</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.CurrentAuthors != null && Model.CurrentAuthors.Any())
+                        {
+                            @string.Join(", ", Model.CurrentAuthors.Select(a => a.Name))
+                        }
+                        else
+                        {
+                            <span class="text-muted">Sin autores</span>
+                        }
+                    </dd>
+                    <dt class="col-sm-3">Año:</dt>
+                    <dd class="col-sm-9">@Model.PublicationYear</dd>
+                    <dt class="col-sm-3">Estado:</dt>
+                    <dd class="col-sm-9">
+                        @{
+                            var estadoNombre = Model.AvailableStatuses?
+                            .FirstOrDefault(s => s.Id == Model.StatusId)?.Name
+                            ?? "No especificado";
+                        }
+                        @estadoNombre
+                    </dd>
+                </dl>
+
+                <form method="post" action="@Url.Action("Index")">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="viewAction" value="@action" />
+                    <input type="hidden" asp-for="Id" />
+
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Confirmar Eliminación
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    }
+    else if (action == "details")
+    {
+        <!-- Detalles -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">@Model.Title</h4>
+                <hr>
+                <dl class="row">
+                    <dt class="col-sm-3">ID:</dt>
+                    <dd class="col-sm-9">@Model.Id</dd>
+                    <dt class="col-sm-3">ISBN:</dt>
+                    <dd class="col-sm-9">@Model.Isbn</dd>
+                    <dt class="col-sm-3">Descripción:</dt>
+                    <dd class="col-sm-9">@Model.Description</dd>
+                    <dt class="col-sm-3">Año Publicación:</dt>
+                    <dd class="col-sm-9">@Model.PublicationYear</dd>
+                    <dt class="col-sm-3">Páginas:</dt>
+                    <dd class="col-sm-9">@Model.Pages</dd>
+                    <dt class="col-sm-3">Copias:</dt>
+                    <dd class="col-sm-9">@Model.AvailableCopies / @Model.TotalCopies</dd>
+                    <dt class="col-sm-3">Ubicación:</dt>
+                    <dd class="col-sm-9">@Model.Ubication</dd>
+                    <dt class="col-sm-3">Estado:</dt>
+                    <dd class="col-sm-9">
+                        @{
+                            var estadoNombre = Model.AvailableStatuses?
+                            .FirstOrDefault(s => s.Id == Model.StatusId)?.Name
+                            ?? "No especificado";
+                        }
+                        @estadoNombre
+                    </dd>
+                    <dt class="col-sm-3">Autores:</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.CurrentAuthors != null && Model.CurrentAuthors.Any())
+                        {
+                            @string.Join(", ", Model.CurrentAuthors.Select(a => a.Name))
+                        }
+                        else
+                        {
+                            <span class="text-muted">No asignado</span>
+                        }
+                    </dd>
+                </dl>
+
+                <div class="d-flex gap-2">
+                    <a href="@Url.Action("Index", new { viewAction = "edit", id = Model.Id })"
+                       class="btn btn-warning">Editar</a>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">Volver al Listado</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Mensajes de TempData
+        $(document).ready(function() {
+            if ('@TempData["success"]') {
+                toastr.success('@TempData["success"]');
+            }
+            if ('@TempData["error"]') {
+                toastr.error('@TempData["error"]');
+            }
+        });
+    </script>
+}

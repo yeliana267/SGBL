@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using SGBL.Application.Dtos.Nationality;
 using SGBL.Application.Dtos.Role;
@@ -8,7 +9,8 @@ using System.Diagnostics;
 
 namespace SGBL.Web.Controllers
 {
-public class NationalityController : Controller
+    [Authorize(Roles = "7")]
+    public class NationalityController : Controller
 {
 private readonly INationalityService _nationality;
 

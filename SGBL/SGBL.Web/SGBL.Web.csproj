@@ -9,8 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.14.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <PackageReference Include="MimeKit" Version="4.14.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,6 +21,21 @@
     <ProjectReference Include="..\SGBL.Domain\SGBL.Domain.csproj" />
     <ProjectReference Include="..\SGBL.Infraestructure\SGBL.Infraestructure.csproj" />
     <ProjectReference Include="..\SGBL.Persistence\SGBL.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\Admin\Settings\" />
+    <Folder Include="Views\Reports\" />
+    <Folder Include="Views\Bibliotecario\LoanManagement\" />
+    <Folder Include="Views\Bibliotecario\BookManagement\" />
+    <Folder Include="Views\Bibliotecario\Returns\" />
+    <Folder Include="Views\Shared\Components\" />
+    <Folder Include="Views\UserDashboard\Books\" />
+    <Folder Include="Views\UserDashboard\MyLoans\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\lib\img\logo library.jpg" />
   </ItemGroup>
 
 </Project>
