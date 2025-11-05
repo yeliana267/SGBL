@@ -36,6 +36,8 @@ namespace SGBL.Application.Profiles
             CreateMap<LoanStatus, LoanStatusDto>().ApplyStandardMapping();
             CreateMap<Book, BookDto>().ApplyStandardMapping();
             CreateMap<Author, AuthorDto>().ApplyStandardMapping();
+       
+            
 
             
             CreateMap<Book, BookDto>()
@@ -60,6 +62,7 @@ namespace SGBL.Application.Profiles
             CreateMap<LoanStatusDto, LoanStatus>().ApplyStandardReverseMapping();
             CreateMap<BookDto, Book>().ApplyStandardReverseMapping();
             CreateMap<AuthorDto, Author>().ApplyStandardReverseMapping();
+           
 
 
 

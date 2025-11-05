@@ -10,10 +10,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">
             @(action == "create" ? "Crear Libro" :
-                        action == "edit" ? "Editar Libro" :
-                        action == "delete" ? "Eliminar Libro" :
-                        action == "details" ? "Detalles del Libro" :
-                        "Libros")
+                            action == "edit" ? "Editar Libro" :
+                            action == "delete" ? "Eliminar Libro" :
+                            action == "details" ? "Detalles del Libro" :
+                            "Libros")
         </h2>
 
         @if (action == "index")
@@ -63,6 +63,7 @@
                                     <th>Título</th>
                                     <th>ISBN</th>
                                     <th>Autores</th>
+                                    <th>Generos</th>
                                     <th>Año</th>
                                     <th>Copias</th>
                                     <th>Estado</th>
@@ -90,6 +91,20 @@
                                                 <span class="text-muted">Sin autores</span>
                                             }
                                         </td>
+                                        <td>
+                                            @if (libro.CurrentGenres != null && libro.CurrentGenres.Any())
+                                            {
+                                                @string.Join(", ", libro.CurrentGenres.Take(2).Select(a => a.Name))
+                                                @if (libro.CurrentGenres.Count > 2)
+                                                {
+                                                    <span class="text-muted"> y @(libro.CurrentGenres.Count - 2) más</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sin generos</span>
+                                            }
+                                        </td>
                                         <td>@libro.PublicationYear</td>
                                         <td>@libro.AvailableCopies/@libro.TotalCopies</td>
                                         <td>
@@ -102,11 +117,11 @@
                                         </td>
                                         <td class="text-center">
                                             <a href="@Url.Action("Index", new { viewAction = "edit", id = libro.Id })"
-                                               class="btn btn-warning btn-sm">Editar</a>
+                                            class="btn btn-warning btn-sm">Editar</a>
                                             <a href="@Url.Action("Index", new { viewAction = "details", id = libro.Id })"
-                                               class="btn btn-info btn-sm">Ver</a>
+                                            class="btn btn-info btn-sm">Ver</a>
                                             <a href="@Url.Action("Index", new { viewAction = "delete", id = libro.Id })"
-                                               class="btn btn-danger btn-sm">Eliminar</a>
+                                            class="btn btn-danger btn-sm">Eliminar</a>
                                         </td>
                                     </tr>
                                 }
@@ -217,7 +232,7 @@
                     <div class="mb-3">
                         <label asp-for="SelectedAuthorIds" class="form-label">Autores *</label>
                         <select asp-for="SelectedAuthorIds" class="form-control" multiple="multiple"
-                                asp-items="@(new SelectList(Model.AvailableAuthors ?? new List<SGBL.Application.ViewModels.AuthorViewModel>(), "Id", "Name"))">
+                        asp-items="@(new SelectList(Model.AvailableAuthors ?? new List<SGBL.Application.ViewModels.AuthorViewModel>(), "Id", "Name"))">
                         </select>
                         <small class="text-muted">Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples autores (máximo 3)</small>
                         <span asp-validation-for="SelectedAuthorIds" class="text-danger"></span>
@@ -231,6 +246,30 @@
                                     @string.Join(", ", Model.CurrentAuthors.Select(a => a.Name))
                                 </small>
                             </div>
+                        }
+                    </div>
+                    <!-- SECCIÓN DE Generos -->
+                    <div class="mb-3">
+                        <label asp-for="SelectedGenresIds" class="form-label">Generos *</label>
+                        <select asp-for="SelectedGenresIds" class="form-control" multiple="multiple"
+                        asp-items="@(new SelectList(Model.AvailableGenres ?? new List<SGBL.Application.ViewModels.GenreViewModel>(), "Id", "Name"))">
+                        </select>
+                        <small class="text-muted">Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples generos</small>
+                        <span asp-validation-for="SelectedGenresIds" class="text-danger"></span>
+                        @{
+
+                            Console.WriteLine(Model.AvailableGenres);
+                        }
+                        <!-- Mostrar generos actuales en modo edición -->
+                        @if (action == "edit" && Model.CurrentGenres != null && Model.CurrentGenres.Any())
+                        {
+                            <div class="mt-2">
+                                <small class="text-success">
+                                    <strong>Generos actuales:</strong>
+                                    @string.Join(", ", Model.CurrentGenres.Select(a => a.Name))
+                                </small>
+                            </div>
+                            
                         }
                     </div>
 

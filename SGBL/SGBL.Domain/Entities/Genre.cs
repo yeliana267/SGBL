@@ -15,5 +15,7 @@ namespace SGBL.Domain.Entities
         [Column("descripcion")]
         public string Description { get; set; }
 
+        public virtual ICollection<BookGenre> BookAuthors { get; set; } = new List<BookGenre>();
+
     }
 }
