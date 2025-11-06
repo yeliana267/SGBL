@@ -56,47 +56,124 @@ namespace SGBL.Web.Controllers
 
         // GET: /UserDashboard/Books
         [HttpGet]
-        public async Task<IActionResult> Books(string? title, int? genreId, int? authorId, int pageNumber = 1, int pageSize = 10)
-
+        public async Task<IActionResult> Books(
+    string viewAction = "search",
+    int? id = null,
+    string? title = null,
+    int? genreId = null,
+    int? authorId = null,
+    int? bookId = null,
+     int pageNumber = 1,
+        int pageSize = 3 //cambien este numero para que salgan mas o menos libros por pagina
+ )
         {
+           
+            // Información del usuario
             ViewData["UserName"] = CurrentUserName;
             ViewData["UserEmail"] = CurrentUserEmail;
             ViewData["UserRole"] = CurrentUserRoleName;
 
 
-            var pagedResultDto = await _bookService.SearchBooksPagedAsync(title, genreId, authorId, pageNumber, pageSize);
-
-            var vm = new PagedResultViewModel
-            {
-                Items = pagedResultDto.Items.Select(MapToVm).ToList(),
-                TotalItems = pagedResultDto.TotalItems,
-                PageNumber = pagedResultDto.PageNumber,
-                PageSize = pagedResultDto.PageSize,
-                TotalPages = pagedResultDto.TotalPages
-            };
-
-            // ⭐ CARGAR AUTORES DISPONIBLES PARA TODOS LOS CASOS
             var authorDtos = await _authorService.GetAll();
             var availableAuthors = authorDtos.Select(a => new AuthorViewModel
             {
                 Id = a.Id,
-                Name = a.Name
+                Name = a.Name,
+                Biography = a.Biography
             }).ToList();
-            // CARGAR generos DISPONIBLES PARA TODOS LOS CASOS
+
+            // Cargar géneros disponibles
             var generosDtos = await _genreService.GetAll();
             var availableGenres = generosDtos.Select(s => new GenreViewModel
             {
                 Id = s.Id,
-                Name = s.Name
+                Name = s.Name,
+                Description = s.Description
             }).ToList();
-            // Guardamos los filtros en ViewBag
+
+            // Guardar en ViewBag (filtros + listas)
             ViewBag.AvailableAuthors = availableAuthors;
             ViewBag.AvailableGenres = availableGenres;
             ViewBag.TitleFilter = title;
             ViewBag.GenreIdFilter = genreId;
             ViewBag.AuthorIdFilter = authorId;
 
-            return View(vm);
+            // Normalizamos la acción (minúsculas siempre)
+            var normalizedAction = (viewAction ?? "search").ToLower();
+            ViewData["Action"] = normalizedAction;
+
+            switch (normalizedAction)
+            {
+                // 🔍 SEARCH (tu código original)
+                #region SearchBooks
+                case "search":
+                default:
+                    var pagedResultDto = await _bookService.SearchBooksPagedAsync(title, genreId, authorId, pageNumber, pageSize);
+
+                    var vm = new PagedResultViewModel
+                    {
+                        Items = pagedResultDto.Items.Select(MapToVm).ToList(),
+                        TotalItems = pagedResultDto.TotalItems,
+                        PageNumber = pagedResultDto.PageNumber,
+                        PageSize = pagedResultDto.PageSize,
+                        TotalPages = pagedResultDto.TotalPages
+                    };
+
+                    // Cargar autores disponibles
+                  if(title== null)
+                    {
+                        if(authorId == null)
+                        {
+                            
+                            ViewBag.SelectedTitle = availableGenres.Where(a => a.Id == genreId).Select(a => a.Name).FirstOrDefault();
+                            ViewBag.SelectedMensaje = availableGenres.Where(a => a.Id == genreId).Select(a => a.Description).FirstOrDefault(); ;
+                        }
+                        else
+                        {
+                            ViewBag.SelectedTitle = availableAuthors.Where(a => a.Id == authorId).Select(a => a.Name).FirstOrDefault();
+                            ViewBag.SelectedMensaje = availableAuthors.Where(a => a.Id == authorId).Select(a => a.Biography).FirstOrDefault(); ;
+                        }
+                    }
+
+                    return View(vm);
+
+                #endregion
+                #region ShowBookDetails
+
+                case "showbook":
+                    if (!bookId.HasValue)
+                    {
+                        return BadRequest("Debe especificar el libro a mostrar.");
+                    }
+                    else
+                    {
+                        BookViewModel newBook = MapToVm(await _bookService.GetById(bookId.Value));
+                        var bookAuthors = await _bookService.GetBookAuthors(bookId.Value);
+                        newBook.CurrentAuthors = bookAuthors.Select(a => new AuthorViewModel
+                        {
+                            Id = a.Id,
+                            Name = a.Name
+                        }).ToList();
+
+
+                        var bookGenres = await _bookService.GetBookGenres(bookId.Value);
+                        newBook.CurrentGenres = bookGenres.Select(a => new GenreViewModel
+                        {
+                            Id = a.Id,
+                            Name = a.Name
+                        }).ToList();
+                        PagedResultViewModel vmPage = new PagedResultViewModel();
+                        vmPage.Items.Add(newBook);
+                        return View(vmPage);
+                        #endregion
+
+
+
+                    }
+
+
+
+            }
         }
 
 
