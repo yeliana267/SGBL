@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SGBL.Application.Dtos.Book;
 using SGBL.Application.Interfaces;
@@ -13,17 +14,21 @@ namespace SGBL.Web.Controllers
         private readonly IBookStatusService _bookStatusService;
         private readonly IAuthorService _authorService; // ⭐ NUEVO SERVICIO
         private readonly IGenreService _genreService; // ⭐ NUEVO SERVICIO
+      // ⭐ NUEVO SERVICIO
+
 
         public BookController(
             IBookService bookService,
             IBookStatusService bookStatusService,
             IAuthorService authorService,
-            IGenreService genreService) // ⭐ AGREGAR PARÁMETRO
+            IGenreService genreService
+            ) // ⭐ AGREGAR PARÁMETRO
         {
             _bookService = bookService;
             _bookStatusService = bookStatusService;
             _authorService = authorService; // ⭐ INICIALIZAR
             _genreService = genreService;
+           
         }
 
         public async Task<IActionResult> Index(string viewAction = "index", int? id = null)
@@ -238,6 +243,8 @@ namespace SGBL.Web.Controllers
                 return View(vm);
             }
         }
+
+      
 
         private static BookViewModel MapToVm(BookDto dto) => new()
         {

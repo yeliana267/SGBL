@@ -7,6 +7,7 @@ using SGBL.Application.Dtos.Notification;
 using SGBL.Application.Dtos.Reminders;
 using SGBL.Application.Dtos.Role;
 using SGBL.Application.Dtos.User;
+using SGBL.Application.ViewModels;
 using SGBL.Domain.Entities;
 
 
@@ -36,6 +37,8 @@ namespace SGBL.Application.Profiles
             CreateMap<LoanStatus, LoanStatusDto>().ApplyStandardMapping();
             CreateMap<Book, BookDto>().ApplyStandardMapping();
             CreateMap<Author, AuthorDto>().ApplyStandardMapping();
+           
+
        
             
 
@@ -62,6 +65,9 @@ namespace SGBL.Application.Profiles
             CreateMap<LoanStatusDto, LoanStatus>().ApplyStandardReverseMapping();
             CreateMap<BookDto, Book>().ApplyStandardReverseMapping();
             CreateMap<AuthorDto, Author>().ApplyStandardReverseMapping();
+           
+
+
            
 
 

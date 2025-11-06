@@ -114,5 +114,28 @@ namespace SGBL.Application.Services
             await _bookRepository.AddAsync(entity);
             return _mapper.Map<BookDto>(entity);
         }
+
+        public async Task<PagedResultDto> SearchBooksPagedAsync(
+    string? title,
+    int? genreId,
+    int? authorId,
+    int pageNumber,
+    int pageSize)
+        {
+            var (books, totalCount) = await _bookRepository.SearchBooksPagedAsync(title, genreId, authorId, pageNumber, pageSize);
+
+            var dto = _mapper.Map<List<BookDto>>(books);
+
+            return new PagedResultDto
+            {
+                Items = dto,
+                TotalItems = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+        }
+
     }
 }

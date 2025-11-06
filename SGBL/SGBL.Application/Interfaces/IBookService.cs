@@ -13,5 +13,11 @@ namespace SGBL.Application.Interfaces
         Task AddGenresToBook(int bookId, List<int> genreIds);
         Task UpdateBookGenres(int bookId, List<int> genreIds);
         Task<List<GenreDto>> GetBookGenres(int bookId);
+        Task<PagedResultDto> SearchBooksPagedAsync(
+    string? title,
+    int? genreId,
+    int? authorId,
+    int pageNumber,
+    int pageSize);
     }
 }
