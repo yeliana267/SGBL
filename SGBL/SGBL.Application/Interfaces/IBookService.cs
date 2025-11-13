@@ -10,5 +10,7 @@ namespace SGBL.Application.Interfaces
         Task AddAuthorsToBook(int bookId, List<int> authorIds);
         Task UpdateBookAuthors(int bookId, List<int> authorIds);
         Task<List<AuthorDto>> GetBookAuthors(int bookId);
+        Task DecreaseAvailableCopies(int bookId);
+        Task IncreaseAvailableCopies(int bookId);
     }
 }

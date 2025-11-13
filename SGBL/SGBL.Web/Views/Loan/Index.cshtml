@@ -1,0 +1,291 @@
+﻿@model SGBL.Application.ViewModels.LoanViewModel
+@{
+    ViewData["Title"] = "Gestión de Préstamos";
+    var loanList = ViewData["LoanList"] as List<SGBL.Application.ViewModels.LoanViewModel> ?? new List<SGBL.Application.ViewModels.LoanViewModel>();
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+        <a href="@Url.Action("Create")" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Nuevo Préstamo
+        </a>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (loanList.Count == 0)
+    {
+        <div class="card shadow mb-4">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No hay préstamos registrados</h4>
+                <p class="text-muted">Comienza creando un nuevo préstamo.</p>
+                <a href="@Url.Action("Create")" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus-circle"></i> Crear Primer Préstamo
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Lista de Préstamos</h6>
+                <div class="d-flex gap-2">
+                    <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Buscar préstamo...">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="filterLoans()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="loansTable" width="100%" cellspacing="0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Libro</th>
+                                <th>Usuario</th>
+                                <th>Fecha Préstamo</th>
+                                <th>Fecha Devolución</th>
+                                <th>Estado</th>
+                                <th>Multa</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var loan in loanList)
+                            {
+                                <tr data-search="@($"{loan.Id} {loan.IdBook} {loan.IdUser}")">
+                                    <td>@loan.Id</td>
+                                    <td>@loan.IdBook</td>
+                                    <td>@loan.IdUser</td>
+                                    <td>@loan.DateLoan.ToString("dd/MM/yyyy")</td>
+                                    <td>@loan.DueDate.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @GetStatusBadge(loan.Status)
+                                    </td>
+                                    <td>
+                                        <span class="@(loan.FineAmount > 0 ? "text-danger fw-bold" : "text-success")">
+                                            $@loan.FineAmount.ToString("N2")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="@Url.Action("Edit", new { id = loan.Id })"
+                                               class="btn btn-outline-primary"
+                                               title="Editar préstamo">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="post" action="@Url.Action("Delete", new { id = loan.Id })"
+                                                  class="d-inline"
+                                                  onsubmit="return confirmDelete(this);">
+                                                <button type="submit" class="btn btn-outline-danger" title="Eliminar préstamo">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal fade" id="loanModal" tabindex="-1" aria-labelledby="loanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loanModalLabel">@(Model?.Id == 0 ? "Nuevo Préstamo" : "Editar Préstamo")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="@(Model?.Id == 0 ? Url.Action("Create") : Url.Action("Edit"))" id="loanForm">
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="IdBook" class="form-label">ID Libro *</label>
+                            <input asp-for="IdBook" class="form-control" type="number" min="1" required />
+                            <span asp-validation-for="IdBook" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="IdUser" class="form-label">ID Usuario *</label>
+                            <input asp-for="IdUser" class="form-control" type="number" min="1" required />
+                            <span asp-validation-for="IdUser" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DateLoan" class="form-label">Fecha Préstamo</label>
+                            <input asp-for="DateLoan" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="DateLoan" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DueDate" class="form-label">Fecha Devolución</label>
+                            <input asp-for="DueDate" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="DueDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PickupDeadline" class="form-label">Límite Recogida</label>
+                            <input asp-for="PickupDeadline" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="PickupDeadline" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Status" class="form-label">Estado</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="1">Pendiente</option>
+                                <option value="2">Recogido</option>
+                                <option value="3">Devuelto</option>
+                                <option value="4">Vencido</option>
+                                <option value="5">Cancelado</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FineAmount" class="form-label">Monto Multa</label>
+                            <input asp-for="FineAmount" class="form-control" type="number" step="0.01" min="0" />
+                            <span asp-validation-for="FineAmount" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="IdLibrarian" class="form-label">ID Bibliotecario</label>
+                            <input asp-for="IdLibrarian" class="form-control" type="number" min="1" />
+                            <span asp-validation-for="IdLibrarian" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label">Notas</label>
+                        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <!-- Información importante -->
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Información importante:</h6>
+                        <ul class="mb-0">
+                            <li>El usuario tiene 24 horas para recoger el libro</li>
+                            <li>El préstamo tiene una duración de 7 días</li>
+                            <li>Se enviarán notificaciones por email automáticamente</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> @(Model?.Id == 0 ? "Crear Préstamo" : "Actualizar")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Función para confirmar eliminación
+        function confirmDelete(form) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción no se puede deshacer",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
+
+        // Función para filtrar préstamos
+        function filterLoans() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#loansTable tbody tr');
+
+            rows.forEach(row => {
+                const searchData = row.getAttribute('data-search').toLowerCase();
+                if (searchData.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Auto-open modal if there are model errors (after postback)
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loanForm');
+            if (form && @((ViewData.ModelState.ErrorCount > 0).ToString().ToLower())) {
+                const modal = new bootstrap.Modal(document.getElementById('loanModal'));
+                modal.show();
+            }
+
+            // Enable search on enter key
+            document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    filterLoans();
+                }
+            });
+        });
+
+        // Show create modal
+        function showCreateModal() {
+            // Reset form for create
+            document.getElementById('loanForm').action = '@Url.Action("Create")';
+            document.querySelector('input[name="Id"]').value = '0';
+            document.getElementById('loanModalLabel').textContent = 'Nuevo Préstamo';
+
+            const modal = new bootstrap.Modal(document.getElementById('loanModal'));
+            modal.show();
+        }
+    </script>
+}
+
+@functions {
+    public string GetStatusBadge(int status)
+    {
+        return status switch
+        {
+            1 => "<span class='badge bg-warning'>Pendiente</span>",
+            2 => "<span class='badge bg-primary'>Recogido</span>",
+            3 => "<span class='badge bg-success'>Devuelto</span>",
+            4 => "<span class='badge bg-danger'>Vencido</span>",
+            5 => "<span class='badge bg-secondary'>Cancelado</span>",
+            _ => "<span class='badge bg-light'>Desconocido</span>"
+        };
+    }
+}

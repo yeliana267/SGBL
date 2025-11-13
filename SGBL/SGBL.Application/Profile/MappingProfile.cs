@@ -33,21 +33,23 @@ namespace SGBL.Application.Profiles
             CreateMap<NotificationStatus, NotificationStatusDto>().ApplyStandardMapping();
             CreateMap<NotificationType, NotificationTypeDto>().ApplyStandardMapping();
             CreateMap<Genre, GenreDto>().ApplyStandardMapping();
+            CreateMap<Loan, LoanDto>().ApplyStandardMapping();
             CreateMap<LoanStatus, LoanStatusDto>().ApplyStandardMapping();
             CreateMap<Book, BookDto>().ApplyStandardMapping();
             CreateMap<Author, AuthorDto>().ApplyStandardMapping();
 
-            
+
             CreateMap<Book, BookDto>()
-   .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
-   .ForMember(d => d.Isbn, o => o.MapFrom(s => s.Isbn))
-   .ForMember(d => d.Description, o => o.MapFrom(s => s.Description))
-   .ForMember(d => d.PublicationYear, o => o.MapFrom(s => s.PublicationYear))
-   .ForMember(d => d.Pages, o => o.MapFrom(s => s.Pages))
-   .ForMember(d => d.TotalCopies, o => o.MapFrom(s => s.TotalCopies))
-   .ForMember(d => d.AvailableCopies, o => o.MapFrom(s => s.AvailableCopies))
-   .ForMember(d => d.Ubication, o => o.MapFrom(s => s.Ubication))
-              .ForMember(d => d.StatusId, o => o.MapFrom(s => s.Status));
+                .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
+                .ForMember(d => d.Isbn, o => o.MapFrom(s => s.Isbn))   
+                .ForMember(d => d.Description, o => o.MapFrom(s => s.Description))
+                .ForMember(d => d.PublicationYear, o => o.MapFrom(s => s.PublicationYear))
+                .ForMember(d => d.Pages, o => o.MapFrom(s => s.Pages))
+                .ForMember(d => d.TotalCopies, o => o.MapFrom(s => s.TotalCopies))
+                .ForMember(d => d.AvailableCopies, o => o.MapFrom(s => s.AvailableCopies))
+                .ForMember(d => d.Ubication, o => o.MapFrom(s => s.Ubication))
+                .ForMember(d => d.StatusId, o => o.MapFrom(s => s.Status));
+
             // Reverse maps con configuración
             CreateMap<RoleDto, Role>().ApplyStandardReverseMapping();
             CreateMap<NationalityDto, Nationality>().ApplyStandardReverseMapping();
@@ -57,6 +59,7 @@ namespace SGBL.Application.Profiles
             CreateMap<NotificationStatusDto, NotificationStatus>().ApplyStandardReverseMapping();
             CreateMap<NotificationTypeDto, NotificationType>().ApplyStandardReverseMapping();
             CreateMap<GenreDto, Genre>().ApplyStandardReverseMapping();
+            CreateMap<LoanDto, Loan>().ApplyStandardReverseMapping();
             CreateMap<LoanStatusDto, LoanStatus>().ApplyStandardReverseMapping();
             CreateMap<BookDto, Book>().ApplyStandardReverseMapping();
             CreateMap<AuthorDto, Author>().ApplyStandardReverseMapping();
@@ -64,17 +67,17 @@ namespace SGBL.Application.Profiles
 
 
             CreateMap<BookDto, Book>()
-    .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
-    .ForMember(d => d.Isbn, o => o.MapFrom(s => s.Isbn))
-    .ForMember(d => d.Description, o => o.MapFrom(s => s.Description))
-    .ForMember(d => d.PublicationYear, o => o.MapFrom(s => s.PublicationYear))
-    .ForMember(d => d.Pages, o => o.MapFrom(s => s.Pages))
-    .ForMember(d => d.TotalCopies, o => o.MapFrom(s => s.TotalCopies))
-    .ForMember(d => d.AvailableCopies, o => o.MapFrom(s => s.AvailableCopies))
-    .ForMember(d => d.Ubication, o => o.MapFrom(s => s.Ubication))
-    .ForMember(d => d.Status, o => o.MapFrom(s => s.StatusId)) 
-    .ForMember(d => d.CreatedAt, o => o.Ignore())
-    .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
+                .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
+                .ForMember(d => d.Isbn, o => o.MapFrom(s => s.Isbn))
+                .ForMember(d => d.Description, o => o.MapFrom(s => s.Description))
+                .ForMember(d => d.PublicationYear, o => o.MapFrom(s => s.PublicationYear))
+                .ForMember(d => d.Pages, o => o.MapFrom(s => s.Pages))
+                .ForMember(d => d.TotalCopies, o => o.MapFrom(s => s.TotalCopies))
+                .ForMember(d => d.AvailableCopies, o => o.MapFrom(s => s.AvailableCopies))
+                .ForMember(d => d.Ubication, o => o.MapFrom(s => s.Ubication))
+                .ForMember(d => d.Status, o => o.MapFrom(s => s.StatusId)) 
+                .ForMember(d => d.CreatedAt, o => o.Ignore())
+                .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
 
         }
 

@@ -19,8 +19,10 @@ namespace SGBL.Application
             services.AddScoped<IBookStatusService, BookStatusService>();
             services.AddScoped<IReminderStatusService, ReminderStatusService>();
             services.AddScoped<INotificationStatusService, NotificationStatusService>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<INotificationTypeService, NotificationTypeService>();
             services.AddScoped<ILoanStatusService, LoanStatusService>();
+            services.AddScoped<ILoanService, LoanService>();
             services.AddScoped<IGenreService, GenreService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAuthorService, AuthorService>();

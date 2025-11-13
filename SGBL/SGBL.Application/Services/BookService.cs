@@ -85,5 +85,15 @@ namespace SGBL.Application.Services
             await _bookRepository.AddAsync(entity);
             return _mapper.Map<BookDto>(entity);
         }
+
+        public Task DecreaseAvailableCopies(int bookId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task IncreaseAvailableCopies(int bookId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
