@@ -30,6 +30,7 @@ namespace SGBL.Domain.Entities
         [Column("estado")]
         public int Status { get; set; }
         public virtual ICollection<BookAuthor> BookAuthors { get; set; } = new List<BookAuthor>();
+        public virtual ICollection<BookGenre> BookGenre { get; set; } = new List<BookGenre>();
 
 
     }
