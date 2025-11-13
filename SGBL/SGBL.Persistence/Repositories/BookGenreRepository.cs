@@ -1,4 +1,5 @@
-﻿using SGBL.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using SGBL.Application.Interfaces;
 using SGBL.Domain.Entities;
 using SGBL.Domain.Interfaces;
 using SGBL.Persistence.Base;
@@ -9,11 +10,43 @@ namespace SGBL.Persistence.Repositories
     public class BookGenreRepository : GenericRepository<BookGenre>, IBookGenreRepository
     {
         private readonly SGBLContext _context;
-        private readonly IServiceLogs _serviceLogs;
-        public BookGenreRepository(SGBLContext context, IServiceLogs serviceLogs) : base(context, serviceLogs)
+
+        public BookGenreRepository(SGBLContext context, IServiceLogs serviceLogs)
+            : base(context, serviceLogs)
         {
             _context = context;
-            _serviceLogs = serviceLogs;
+        }
+
+        public async Task<IEnumerable<BookGenre>> GetByBookIdAsync(int bookId)
+        {
+            return await _context.BookGenres
+                .Include(ba => ba.Genre)
+                .Where(ba => ba.IdBook == bookId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<BookGenre>> GetByGenreIdAsync(int authorId)
+        {
+            return await _context.BookGenres
+                .Include(ba => ba.Book)
+                .Where(ba => ba.IdGenre == authorId)
+                .ToListAsync();
+        }
+
+        public async Task<bool> RemoveByBookIdAsync(int bookId)
+        {
+            var bookGenres = await _context.BookGenres
+                .Where(ba => ba.IdBook == bookId)
+                .ToListAsync();
+
+            _context.BookGenres.RemoveRange(bookGenres);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task AddRangeAsync(IEnumerable<BookGenre> bookGenres)
+        {
+            await _context.BookGenres.AddRangeAsync(bookGenres);
+            await _context.SaveChangesAsync();
         }
     }
 }
