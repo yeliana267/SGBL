@@ -43,7 +43,10 @@ namespace SGBL.Application.ViewModels
         // Propiedad para mostrar los estados disponibles
         public List<BookStatusViewModel>? AvailableStatuses { get; set; }
         public List<int> SelectedAuthorIds { get; set; } = new List<int>();
+        public List<int> SelectedGenresIds { get; set; } = new List<int>();
         public List<AuthorViewModel> AvailableAuthors { get; set; } = new List<AuthorViewModel>();
+        public List<GenreViewModel> AvailableGenres { get; set; } = new List<GenreViewModel>();
         public List<AuthorViewModel> CurrentAuthors { get; set; } = new List<AuthorViewModel>();
+        public List<GenreViewModel> CurrentGenres { get; set; } = new List<GenreViewModel>();
     }
 }

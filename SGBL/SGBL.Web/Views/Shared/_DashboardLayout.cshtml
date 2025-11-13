@@ -183,7 +183,9 @@
                     <div class="user-info">
                         <div class="text-center">
                             <i class="fas fa-user-circle fa-2x mb-2"></i>
-                            <h6 class="mb-1">@ViewData["UserName"]</h6>
+                            <h6 class="mb-1 text-truncate" style="max-width: 150px; margin: 0 auto; overflow-wrap: break-word;">
+                                @ViewData["UserName"]
+                            </h6>
                             <small>@ViewData["UserRole"]</small>
                             <br>
                             <small>@ViewData["UserEmail"]</small>
@@ -218,7 +220,7 @@
                                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                             </a>
                             <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Books" ? "active" : "")"
-                               href="@Url.Action("Books", "User")">
+                               href="@Url.Action("Books", "UserDashboard")">
                                 <i class="fas fa-book me-2"></i>Buscar Libros
                             </a>
                             <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "MyLoans" ? "active" : "")"

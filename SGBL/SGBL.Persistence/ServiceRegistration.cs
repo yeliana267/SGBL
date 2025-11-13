@@ -56,6 +56,7 @@ namespace SGBL.Persistence
             services.AddScoped<ILoanStatusRepository, LoanStatusRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IBookAuthorRepository, BookAuthorRepository>();
+            services.AddScoped<IBookGenreRepository, BookGenreRepository>();
 
             #endregion
         }
