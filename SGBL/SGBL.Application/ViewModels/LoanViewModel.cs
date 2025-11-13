@@ -1,7 +1,7 @@
 ﻿
-namespace SGBL.Application.Dtos.Loan
+namespace SGBL.Application.ViewModels
 {
-    public class LoanDto : BaseAuditableDto<int>
+    public class LoanViewModel : BaseViewModel<int>
     {
         public int IdBook { get; set; }
         public int IdUser { get; set; }

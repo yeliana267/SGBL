@@ -244,7 +244,10 @@ namespace SGBL.Web.Controllers
             }
         }
 
-      
+        public async Task DecreaseAvailableCopies(int bookId)
+        {
+
+        }
 
         private static BookViewModel MapToVm(BookDto dto) => new()
         {

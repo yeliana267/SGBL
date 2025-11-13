@@ -50,10 +50,12 @@ namespace SGBL.Persistence
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBookStatusRepository, BookStatusRepository>();
             services.AddScoped<IReminderStatusRepository, ReminderStatusRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<INotificationStatusRepository, NotificationStatusRepository>();
             services.AddScoped<INotificationTypeRepository, NotificationTypeRepository>();
             services.AddScoped<IGenreRepository, GenreRepository>();
             services.AddScoped<ILoanStatusRepository, LoanStatusRepository>();
+            services.AddScoped<ILoanRepository, LoanRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IBookAuthorRepository, BookAuthorRepository>();
             services.AddScoped<IBookGenreRepository, BookGenreRepository>();

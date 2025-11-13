@@ -7,7 +7,7 @@ namespace SGBL.Application.ViewModels
        
         public virtual T Id { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; } 
 
         public string? Message { get; set; }
     }

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using SGBL.Application.Dtos.Author;
 using SGBL.Application.Dtos.Book;
 using SGBL.Application.Interfaces;
@@ -115,6 +115,15 @@ namespace SGBL.Application.Services
             return _mapper.Map<BookDto>(entity);
         }
 
+        public async Task DecreaseAvailableCopies(int bookId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task IncreaseAvailableCopies(int bookId)
+        {
+            throw new NotImplementedException();
+        }
         public async Task<PagedResultDto> SearchBooksPagedAsync(
     string? title,
     int? genreId,
