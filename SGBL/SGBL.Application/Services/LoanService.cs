@@ -20,7 +20,7 @@ namespace SGBL.Application.Services
         private const int LoanStatusPending = 1;
         private const int LoanStatusPickedUp = 2;
         private const int LoanStatusReturned = 3;
-        private const int LoanStatusCancelled = 4;
+        private const int LoanStatusCancelled = 5;
         public LoanService(ILoanRepository loanRepository, IBookRepository bookRepository, IMapper mapper, IServiceLogs serviceLogs) : base(loanRepository, mapper, serviceLogs)
         {
             _loanRepository = loanRepository;
