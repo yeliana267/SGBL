@@ -1,16 +1,31 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SGBL.Application.Dtos.Book;
+using SGBL.Application.Interfaces;
+using SGBL.Application.Services;
+using SGBL.Application.ViewModels;
 
 namespace SGBL.Web.Controllers
 {
     [Authorize(Roles = "9")] // Solo usuarios con rol 2 (User) pueden acceder
     public class UserDashboardController : BaseController
     {
-        private readonly ILogger<UserDashboardController> _logger;
+        private readonly IBookService _bookService;
+        private readonly IAuthorService _authorService; // ⭐ NUEVO SERVICIO
+        private readonly IGenreService _genreService; // ⭐ NUEVO SERVICIO
+                                                      // ⭐ NUEVO SERVICIO
 
-        public UserDashboardController(ILogger<UserDashboardController> logger)
+
+        public UserDashboardController(
+            IBookService bookService,
+            IAuthorService authorService,
+            IGenreService genreService
+            ) // ⭐ AGREGAR PARÁMETRO
         {
-            _logger = logger;
+            _bookService = bookService;
+            _authorService = authorService; // ⭐ INICIALIZAR
+            _genreService = genreService;
+
         }
 
         // GET: /UserDashboard/Dashboard
@@ -41,15 +56,127 @@ namespace SGBL.Web.Controllers
 
         // GET: /UserDashboard/Books
         [HttpGet]
-        public IActionResult Books()
+        public async Task<IActionResult> Books(
+    string viewAction = "search",
+    int? id = null,
+    string? title = null,
+    int? genreId = null,
+    int? authorId = null,
+    int? bookId = null,
+     int pageNumber = 1,
+        int pageSize = 3 //cambien este numero para que salgan mas o menos libros por pagina
+ )
         {
-            LogAction("Accedió a la búsqueda de libros");
-
-            ViewData["Title"] = "Buscar Libros";
+           
+            // Información del usuario
+            ViewData["UserName"] = CurrentUserName;
+            ViewData["UserEmail"] = CurrentUserEmail;
             ViewData["UserRole"] = CurrentUserRoleName;
 
-            return View();
+
+            var authorDtos = await _authorService.GetAll();
+            var availableAuthors = authorDtos.Select(a => new AuthorViewModel
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Biography = a.Biography
+            }).ToList();
+
+            // Cargar géneros disponibles
+            var generosDtos = await _genreService.GetAll();
+            var availableGenres = generosDtos.Select(s => new GenreViewModel
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Description = s.Description
+            }).ToList();
+
+            // Guardar en ViewBag (filtros + listas)
+            ViewBag.AvailableAuthors = availableAuthors;
+            ViewBag.AvailableGenres = availableGenres;
+            ViewBag.TitleFilter = title;
+            ViewBag.GenreIdFilter = genreId;
+            ViewBag.AuthorIdFilter = authorId;
+
+            // Normalizamos la acción (minúsculas siempre)
+            var normalizedAction = (viewAction ?? "search").ToLower();
+            ViewData["Action"] = normalizedAction;
+
+            switch (normalizedAction)
+            {
+                // 🔍 SEARCH (tu código original)
+                #region SearchBooks
+                case "search":
+                default:
+                    var pagedResultDto = await _bookService.SearchBooksPagedAsync(title, genreId, authorId, pageNumber, pageSize);
+
+                    var vm = new PagedResultViewModel
+                    {
+                        Items = pagedResultDto.Items.Select(MapToVm).ToList(),
+                        TotalItems = pagedResultDto.TotalItems,
+                        PageNumber = pagedResultDto.PageNumber,
+                        PageSize = pagedResultDto.PageSize,
+                        TotalPages = pagedResultDto.TotalPages
+                    };
+
+                    // Cargar autores disponibles
+                  if(title== null)
+                    {
+                        if(authorId == null)
+                        {
+                            
+                            ViewBag.SelectedTitle = availableGenres.Where(a => a.Id == genreId).Select(a => a.Name).FirstOrDefault();
+                            ViewBag.SelectedMensaje = availableGenres.Where(a => a.Id == genreId).Select(a => a.Description).FirstOrDefault(); ;
+                        }
+                        else
+                        {
+                            ViewBag.SelectedTitle = availableAuthors.Where(a => a.Id == authorId).Select(a => a.Name).FirstOrDefault();
+                            ViewBag.SelectedMensaje = availableAuthors.Where(a => a.Id == authorId).Select(a => a.Biography).FirstOrDefault(); ;
+                        }
+                    }
+
+                    return View(vm);
+
+                #endregion
+                #region ShowBookDetails
+
+                case "showbook":
+                    if (!bookId.HasValue)
+                    {
+                        return BadRequest("Debe especificar el libro a mostrar.");
+                    }
+                    else
+                    {
+                        BookViewModel newBook = MapToVm(await _bookService.GetById(bookId.Value));
+                        var bookAuthors = await _bookService.GetBookAuthors(bookId.Value);
+                        newBook.CurrentAuthors = bookAuthors.Select(a => new AuthorViewModel
+                        {
+                            Id = a.Id,
+                            Name = a.Name
+                        }).ToList();
+
+
+                        var bookGenres = await _bookService.GetBookGenres(bookId.Value);
+                        newBook.CurrentGenres = bookGenres.Select(a => new GenreViewModel
+                        {
+                            Id = a.Id,
+                            Name = a.Name
+                        }).ToList();
+                        PagedResultViewModel vmPage = new PagedResultViewModel();
+                        vmPage.Items.Add(newBook);
+                        return View(vmPage);
+                        #endregion
+
+
+
+                    }
+
+
+
+            }
         }
+
+
 
         // GET: /UserDashboard/MyLoans
         [HttpGet]
@@ -62,5 +189,20 @@ namespace SGBL.Web.Controllers
 
             return View();
         }
+        private static BookViewModel MapToVm(BookDto dto) => new()
+        {
+            Id = dto.Id,
+            Title = dto.Title,
+            Isbn = dto.Isbn,
+            Description = dto.Description,
+            PublicationYear = dto.PublicationYear,
+            Pages = dto.Pages,
+            TotalCopies = dto.TotalCopies,
+            AvailableCopies = dto.AvailableCopies,
+            Ubication = dto.Ubication,
+            StatusId = dto.StatusId,
+            CreatedAt = dto.CreatedAt,
+            UpdatedAt = dto.UpdatedAt
+        };
     }
 }

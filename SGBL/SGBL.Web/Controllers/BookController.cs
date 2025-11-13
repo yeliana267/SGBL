@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SGBL.Application.Dtos.Book;
 using SGBL.Application.Interfaces;
@@ -12,15 +13,22 @@ namespace SGBL.Web.Controllers
         private readonly IBookService _bookService;
         private readonly IBookStatusService _bookStatusService;
         private readonly IAuthorService _authorService; // ⭐ NUEVO SERVICIO
+        private readonly IGenreService _genreService; // ⭐ NUEVO SERVICIO
+      // ⭐ NUEVO SERVICIO
+
 
         public BookController(
             IBookService bookService,
             IBookStatusService bookStatusService,
-            IAuthorService authorService) // ⭐ AGREGAR PARÁMETRO
+            IAuthorService authorService,
+            IGenreService genreService
+            ) // ⭐ AGREGAR PARÁMETRO
         {
             _bookService = bookService;
             _bookStatusService = bookStatusService;
             _authorService = authorService; // ⭐ INICIALIZAR
+            _genreService = genreService;
+           
         }
 
         public async Task<IActionResult> Index(string viewAction = "index", int? id = null)
@@ -43,14 +51,21 @@ namespace SGBL.Web.Controllers
                 Id = a.Id,
                 Name = a.Name
             }).ToList();
-
+            // CARGAR generos DISPONIBLES PARA TODOS LOS CASOS
+            var generosDtos = await _genreService.GetAll();
+            var availableGenres = generosDtos.Select(s => new GenreViewModel
+            {
+                Id = s.Id,
+                Name = s.Name
+            }).ToList();
             switch (normalizedAction)
             {
                 case "create":
                     var createVm = new BookViewModel
                     {
                         AvailableStatuses = availableStatuses,
-                        AvailableAuthors = availableAuthors // ⭐ AGREGAR AUTORES
+                        AvailableAuthors = availableAuthors,
+                        AvailableGenres = availableGenres 
                     };
                     return View(createVm);
 
@@ -64,8 +79,9 @@ namespace SGBL.Web.Controllers
                     var vm = MapToVm(dto);
                     vm.AvailableStatuses = availableStatuses;
                     vm.AvailableAuthors = availableAuthors; // ⭐ AGREGAR AUTORES
+                    vm.AvailableGenres = availableGenres; // AGREGAR GENEROS
 
-                    // ⭐ CARGAR AUTORES ACTUALES DEL LIBRO
+                    // ⭐ CARGAR AUTORES y generos ACTUALES DEL LIBRO
                     if (id.HasValue && (normalizedAction == "edit" || normalizedAction == "details"))
                     {
                         var bookAuthors = await _bookService.GetBookAuthors(id.Value);
@@ -75,7 +91,17 @@ namespace SGBL.Web.Controllers
                             Name = a.Name
                         }).ToList();
                         vm.SelectedAuthorIds = bookAuthors.Select(a => a.Id).ToList();
+
+
+                        var bookGenres = await _bookService.GetBookGenres(id.Value);
+                        vm.CurrentGenres = bookGenres.Select(a => new GenreViewModel
+                        {
+                            Id = a.Id,
+                            Name = a.Name
+                        }).ToList();
+                        vm.SelectedGenresIds = bookGenres.Select(a => a.Id).ToList();
                     }
+
 
                     return View(vm);
 
@@ -84,7 +110,7 @@ namespace SGBL.Web.Controllers
                     var dtos = await _bookService.GetAll();
                     var bookList = dtos.Select(MapToVm).ToList();
 
-                    // ASIGNAR LOS ESTADOS Y AUTORES A CADA LIBRO EN EL LISTADO
+                    // ASIGNAR LOS ESTADOS, generos Y AUTORES A CADA LIBRO EN EL LISTADO
                     foreach (var book in bookList)
                     {
                         book.AvailableStatuses = availableStatuses;
@@ -95,13 +121,21 @@ namespace SGBL.Web.Controllers
                             Id = a.Id,
                             Name = a.Name
                         }).ToList();
+                        // ⭐ CARGAR generos PARA CADA LIBRO EN EL LISTADO
+                        var bookGenres = await _bookService.GetBookGenres(book.Id);
+                        book.CurrentGenres = bookGenres.Select(a => new GenreViewModel
+                        {
+                            Id = a.Id,
+                            Name = a.Name
+                        }).ToList();
                     }
 
                     ViewData["BookList"] = bookList;
                     return View(new BookViewModel
                     {
                         AvailableStatuses = availableStatuses,
-                        AvailableAuthors = availableAuthors // ⭐ AGREGAR AUTORES
+                        AvailableAuthors = availableAuthors, // ⭐ AGREGAR AUTORES
+                        AvailableGenres = availableGenres
                     });
             }
         }
@@ -128,6 +162,13 @@ namespace SGBL.Web.Controllers
                 Id = a.Id,
                 Name = a.Name
             }).ToList();
+            // ⭐ CARGAR generos DISPONIBLES EN CASO DE ERROR
+            var genreDtos = await _genreService.GetAll();
+            vm.AvailableGenres = genreDtos.Select(a => new GenreViewModel
+            {
+                Id = a.Id,
+                Name = a.Name
+            }).ToList();
 
             if (!ModelState.IsValid && normalizedAction != "delete")
             {
@@ -146,6 +187,11 @@ namespace SGBL.Web.Controllers
                         {
                             await _bookService.AddAuthorsToBook(created.Id, vm.SelectedAuthorIds);
                         }
+                        // ⭐ GUARDAR LAS RELACIONES CON generos
+                        if (vm.SelectedGenresIds != null && vm.SelectedGenresIds.Any())
+                        {
+                            await _bookService.AddGenresToBook(created.Id, vm.SelectedGenresIds);
+                        }
 
                         TempData["success"] = $"Libro '{created?.Title}' creado correctamente.";
                         break;
@@ -162,6 +208,17 @@ namespace SGBL.Web.Controllers
                         {
                             // Si no se seleccionaron autores, eliminar relaciones existentes
                             await _bookService.UpdateBookAuthors(vm.Id, new List<int>());
+                        }
+
+                        // ⭐ ACTUALIZAR LAS RELACIONES CON generos
+                        if (vm.SelectedGenresIds != null && vm.SelectedGenresIds.Any())
+                        {
+                            await _bookService.UpdateBookGenres(vm.Id, vm.SelectedGenresIds);
+                        }
+                        else
+                        {
+                            // Si no se seleccionaron autores, eliminar relaciones existentes
+                            await _bookService.UpdateBookGenres(vm.Id, new List<int>());
                         }
 
                         TempData["success"] = $"Libro '{updated?.Title}' actualizado correctamente.";
@@ -186,6 +243,8 @@ namespace SGBL.Web.Controllers
                 return View(vm);
             }
         }
+
+      
 
         private static BookViewModel MapToVm(BookDto dto) => new()
         {

@@ -1,0 +1,275 @@
+﻿@model SGBL.Application.ViewModels.PagedResultViewModel
+
+@{
+    ViewData["Title"] = "Búsqueda de libros";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var authors = ViewBag.AvailableAuthors as List<SGBL.Application.ViewModels.AuthorViewModel> ?? new List<SGBL.Application.ViewModels.AuthorViewModel>();
+    var genres = ViewBag.AvailableGenres as List<SGBL.Application.ViewModels.GenreViewModel> ?? new List<SGBL.Application.ViewModels.GenreViewModel>();
+    int? selectedAuthorId = ViewBag.AuthorIdFilter as int?;
+    int? selectedGenreId = ViewBag.GenreIdFilter as int?;
+    string titleFilter = ViewBag.TitleFilter as string ?? string.Empty;
+    string? SelectedMensaje = ViewBag.SelectedMensaje;
+    string? SelectedTitle = ViewBag.SelectedTitle;
+
+
+
+    var action = ViewData["Action"] as string ?? "search";
+}
+<form asp-action="Books" method="get" class="mb-4" onsubmit="return validateSearch()">
+    <input type="hidden" name="viewAction" value="search" />
+
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label for="title" class="form-label">Título</label>
+            <input type="text" id="title" name="title" class="form-control" value="@titleFilter" />
+        </div>
+
+        <div class="col-md-3">
+            <label for="authorId" class="form-label">Autor</label>
+            <select id="authorId" name="authorId" class="form-select">
+                <option value="">Seleccione un autor</option>
+                @foreach (var author in authors)
+                {
+                    bool isSelected = selectedAuthorId == author.Id;
+                    <option value="@author.Id" selected="@(isSelected)">
+                        @author.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="genreId" class="form-label">Género</label>
+            <select id="genreId" name="genreId" class="form-select">
+                <option value="">Seleccione un género</option>
+                @foreach (var genre in genres)
+                {
+                    bool isSelected = selectedGenreId == genre.Id;
+                    <option value="@genre.Id" selected="@(isSelected)">
+                        @genre.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    function validateSearch() {
+    var title = document.getElementById("title").value.trim();
+    var author = document.getElementById("authorId").value;
+    var genre = document.getElementById("genreId").value;
+
+    if (!title && !author && !genre) {
+    alert("Ingrese al menos un criterio de búsqueda (título, autor o género).");
+    return false;
+    }
+    return true;
+    }
+</script>
+
+@if (action == "search")
+{
+
+
+    @if (Model.Items == null || !Model.Items.Any())
+    {
+        <p>No se encontraron libros.</p>
+    }
+    else
+    {
+        @if ( !string.IsNullOrEmpty(SelectedTitle) && !string.IsNullOrEmpty(SelectedMensaje))
+        {
+            <div class="text-center my-3">
+                <h3 class="fw-bold text-primary">@SelectedTitle</h3>
+                <p class="text-muted">@SelectedMensaje</p>
+            </div>
+        }
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var book in Model.Items)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@book.Title</h5>
+                            <p class="card-text">@book.Description</p>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Publicado: @book.PublicationYear</small>
+
+                            <form asp-controller="UserDashboard" asp-action="Books" method="get">
+                                <input type="hidden" name="viewAction" value="showbook" />
+                                <input type="hidden" name="bookId" value="@book.Id" />
+                                <button type="submit" class="btn btn-outline-primary btn-sm">
+                                    Ver más
+                                </button>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="pagination mt-3 d-flex justify-content-center align-items-center">
+            @if (Model.PageNumber > 1)
+            {
+                <a asp-controller="UserDashboard"
+                   asp-action="Books"
+                   asp-route-viewAction="search"
+                   asp-route-title="@ViewBag.TitleFilter"
+                   asp-route-genreId="@ViewBag.GenreIdFilter"
+                   asp-route-authorId="@ViewBag.AuthorIdFilter"
+                   asp-route-pageNumber="@(Model.PageNumber - 1)"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="btn btn-outline-primary me-2">
+                    Anterior
+                </a>
+            }
+
+            <span class="mx-2">Página @Model.PageNumber de @Model.TotalPages</span>
+
+            @if (Model.PageNumber < Model.TotalPages)
+            {
+                <a asp-controller="UserDashboard"
+                   asp-action="Books"
+                   asp-route-viewAction="search"
+                   asp-route-title="@ViewBag.TitleFilter"
+                   asp-route-genreId="@ViewBag.GenreIdFilter"
+                   asp-route-authorId="@ViewBag.AuthorIdFilter"
+                   asp-route-pageNumber="@(Model.PageNumber + 1)"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="btn btn-outline-primary ms-2">
+                    Siguiente
+                </a>
+            }
+        </div>
+
+    }
+}
+else if (action == "showbook")
+{
+    var book = Model.Items.FirstOrDefault() as SGBL.Application.ViewModels.BookViewModel;
+
+    if (book != null)
+    {
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-5">
+            <div class="row align-items-start">
+                <!-- Columna izquierda: descripción -->
+                <div class="col-md-6 mb-4">
+                    <h3 class="fw-bold text-primary mb-3">@book.Title</h3>
+                    <p class="text-muted">@book.Description</p>
+                </div>
+
+                <!-- Columna derecha: detalles -->
+                <div class="col-md-6 mb-4">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>ISBN:</strong> @book.Isbn</li>
+                        <li class="list-group-item"><strong>Año de publicación:</strong> @book.PublicationYear</li>
+                        <li class="list-group-item"><strong>Páginas:</strong> @book.Pages</li>
+                        <li class="list-group-item"><strong>Copias disponibles:</strong> @book.AvailableCopies / @book.TotalCopies</li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr />
+
+            <!-- Autores -->
+                    <!-- Autores -->
+                    <div class="mb-4">
+                        <h5 class="fw-semibold text-secondary">Autores:</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var author in book.CurrentAuthors)
+                            {
+                                <a asp-controller="UserDashboard"
+                                   asp-action="Books"
+                                   asp-route-viewAction="search"
+                                   asp-route-authorId="@author.Id"
+                                   class="btn btn-outline-primary btn-sm rounded-pill">
+                                    <i class="fas fa-user me-2"></i>@author.Name
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Géneros -->
+                    <div class="mb-4">
+                        <h5 class="fw-semibold text-secondary">Géneros:</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var genre in book.CurrentGenres)
+                            {
+                                <a asp-controller="UserDashboard"
+                                   asp-action="Books"
+                                   asp-route-viewAction="search"
+                                   asp-route-genreId="@genre.Id"
+                                   class="btn btn-outline-success btn-sm rounded-pill">
+                                    <i class="fas fa-book me-2"></i>@genre.Name
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+            <!-- Estado y acción -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div>
+                    <h6 class="mb-0">
+                        <span class="fw-semibold">Estado:</span>
+                                @{
+                                    string statusText = "";
+                                    string badgeClass = "";
+
+                                    switch (book.StatusId)
+                                    {
+                                        case 12:
+                                            statusText = "Disponible";
+                                            badgeClass = "bg-success"; // verde
+                                            break;
+
+                                        case 13:
+                                            statusText = "Agotado";
+                                            badgeClass = "bg-danger"; // rojo
+                                            break;
+
+                                        case 14:
+                                            statusText = "Prestado";
+                                            badgeClass = "bg-warning text-dark"; // amarillo
+                                            break;
+
+                                        default:
+                                            statusText = "Desconocido";
+                                            badgeClass = "bg-secondary";
+                                            break;
+                                    }
+                                }
+
+                                <span class="badge @badgeClass">@statusText</span>
+                    </h6>
+                </div>
+                <button class="btn btn-warning btn-sm">
+                    <i class="fas fa-bell me-2"></i>Recordarme
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    }
+    else
+    {
+<div class="alert alert-warning text-center mt-4">
+    No se encontró el libro seleccionado.
+</div>
+    }
+}
+
+
+
+
+
