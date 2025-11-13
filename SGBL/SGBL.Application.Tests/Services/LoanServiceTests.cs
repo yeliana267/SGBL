@@ -42,13 +42,15 @@ namespace SGBL.Application.Tests.Services
         [Fact]
         public async Task AddAsync_Should_CreateLoan_AndDecreaseBookStock()
         {
+            var now = DateTime.UtcNow;
+
             var dto = new LoanDto
             {
                 IdBook = 1,
                 IdUser = 2,
                 IdLibrarian = 3,
-                PickupDeadline = DateTime.Now.AddDays(1),
-                DueDate = DateTime.Now.AddDays(7)
+                PickupDeadline = now.AddDays(1),
+                DueDate = now.AddDays(7)
             };
 
             var book = new Book { Id = 1, AvailableCopies = 2, TotalCopies = 5 };
@@ -68,7 +70,7 @@ namespace SGBL.Application.Tests.Services
 
             Assert.NotNull(result);
             Assert.Equal(10, result!.Id);
-            Assert.Equal(1, result.Status);
+            Assert.Equal(1, result.Status.GetValueOrDefault());
 
             _bookRepositoryMock.Verify(r => r.AdjustAvailableCopiesAsync(dto.IdBook, -1), Times.Once);
             _loanRepositoryMock.Verify(r => r.AddAsync(It.IsAny<Loan>()), Times.Once);
@@ -77,15 +79,18 @@ namespace SGBL.Application.Tests.Services
         [Fact]
         public async Task UpdateAsync_ToPickedUp_Should_SetPickupDate()
         {
+            var now = DateTime.UtcNow;
+
             var existingLoan = new Loan
             {
                 Id = 20,
                 IdBook = 5,
                 Status = 1,
-                PickupDeadline = DateTime.Now.AddHours(-1),
-                DueDate = DateTime.Now.AddDays(5),
+                PickupDeadline = now.AddHours(-1),
+                DueDate = now.AddDays(5),
                 PickupDate = default,
-                ReturnDate = default
+                ReturnDate = default,
+                CreatedAt = now.AddDays(-3)
             };
 
             _loanRepositoryMock.Setup(r => r.GetById(existingLoan.Id)).ReturnsAsync(existingLoan);
@@ -102,7 +107,7 @@ namespace SGBL.Application.Tests.Services
             var result = await _loanService.UpdateAsync(dto, dto.Id);
 
             Assert.NotNull(result);
-            Assert.Equal(2, result!.Status);
+            Assert.Equal(2, result!.Status.GetValueOrDefault());
 
             _loanRepositoryMock.Verify(r => r.UpdateAsync(dto.Id, It.Is<Loan>(l => l.PickupDate != default)), Times.Once);
             _bookRepositoryMock.Verify(r => r.AdjustAvailableCopiesAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
@@ -111,15 +116,18 @@ namespace SGBL.Application.Tests.Services
         [Fact]
         public async Task UpdateAsync_ToReturned_Should_IncreaseBookStock()
         {
+            var now = DateTime.UtcNow;
+
             var existingLoan = new Loan
             {
                 Id = 30,
                 IdBook = 7,
                 Status = 2,
-                PickupDeadline = DateTime.Now.AddDays(-2),
-                DueDate = DateTime.Now.AddDays(3),
-                PickupDate = DateTime.Now.AddDays(-1),
-                ReturnDate = default
+                PickupDeadline = now.AddDays(-2),
+                DueDate = now.AddDays(3),
+                PickupDate = now.AddDays(-1),
+                ReturnDate = default,
+                CreatedAt = now.AddDays(-6)
             };
 
             _loanRepositoryMock.Setup(r => r.GetById(existingLoan.Id)).ReturnsAsync(existingLoan);
@@ -139,7 +147,7 @@ namespace SGBL.Application.Tests.Services
             var result = await _loanService.UpdateAsync(dto, dto.Id);
 
             Assert.NotNull(result);
-            Assert.Equal(3, result!.Status);
+            Assert.Equal(3, result!.Status.GetValueOrDefault());
 
             _bookRepositoryMock.Verify(r => r.AdjustAvailableCopiesAsync(existingLoan.IdBook, 1), Times.Once);
         }
@@ -154,10 +162,11 @@ namespace SGBL.Application.Tests.Services
                     Id = 40,
                     IdBook = 11,
                     Status = 1,
-                    PickupDeadline = DateTime.Now.AddDays(-2),
+                    PickupDeadline = DateTime.UtcNow.AddDays(-2),
                     PickupDate = default,
                     ReturnDate = default,
-                    Notes = string.Empty
+                    Notes = string.Empty,
+                    CreatedAt = DateTime.UtcNow.AddDays(-10)
                 }
             };
 
@@ -172,7 +181,7 @@ namespace SGBL.Application.Tests.Services
             var cancelledCount = await _loanService.CancelLoansNotPickedUpAsync();
 
             Assert.Equal(1, cancelledCount);
-            Assert.Equal(4, overdueLoans[0].Status);
+            Assert.Equal(4, overdueLoans[0].Status.GetValueOrDefault());
 
             _bookRepositoryMock.Verify(r => r.AdjustAvailableCopiesAsync(11, 1), Times.Once);
             _loanRepositoryMock.Verify(r => r.UpdateLoansAsync(overdueLoans), Times.Once);
