@@ -24,10 +24,10 @@
             <dd class="col-sm-9">@Model.StatusDescription</dd>
 
             <dt class="col-sm-3">Libro</dt>
-            <dd class="col-sm-9">@(Model.IdBook > 0 ? Model.IdBook.ToString() : "-")</dd>
+            <dd class="col-sm-9">@(Model.IdBook.HasValue ? Model.IdBook.Value.ToString() : "-")</dd>
 
             <dt class="col-sm-3">Préstamo</dt>
-            <dd class="col-sm-9">@(Model.IdLoan > 0 ? Model.IdLoan.ToString() : "-")</dd>
+            <dd class="col-sm-9">@(Model.IdLoan.HasValue ? Model.IdLoan.Value.ToString() : "-")</dd>
 
             <dt class="col-sm-3">Creada</dt>
             <dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>

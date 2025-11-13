@@ -41,6 +41,27 @@ namespace SGBL.Persistence.Context
                 .HasOne(ba => ba.Author)
                 .WithMany(a => a.BookAuthors)
                 .HasForeignKey(ba => ba.IdAuthor);
+
+            modelBuilder.Entity<Loan>(entity =>
+            {
+                entity.ToTable("prestamos");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id).HasColumnName("idprestamo");
+                entity.Property(e => e.IdBook).HasColumnName("id_libro");
+                entity.Property(e => e.IdUser).HasColumnName("id_usuario");
+                entity.Property(e => e.IdLibrarian).HasColumnName("id_bibliotecario");
+                entity.Property(e => e.DateLoan).HasColumnName("fecha_prestamo");
+                entity.Property(e => e.DueDate).HasColumnName("fecha_vencimiento");
+                entity.Property(e => e.ReturnDate).HasColumnName("fecha_devolucion");
+                entity.Property(e => e.PickupDate).HasColumnName("fecha_retiro");
+                entity.Property(e => e.PickupDeadline).HasColumnName("fecha_limite_retiro");
+                entity.Property(e => e.Status).HasColumnName("estado");
+                entity.Property(e => e.FineAmount).HasColumnName("monto_multa");
+                entity.Property(e => e.Notes).HasColumnName("notas");
+                entity.Property(e => e.CreatedAt).HasColumnName("fecha_creacion");
+                entity.Property(e => e.UpdatedAt).HasColumnName("fecha_actualizacion");
+            });
         }
     }
 }
