@@ -89,7 +89,7 @@ namespace SGBL.Application.Tests.Services
             Assert.NotNull(result);
             Assert.Equal(userId, result.IdUser);
             Assert.Equal(loanId, result.IdLoan);
-            Assert.Equal(0, result.IdBook);
+            Assert.Null(result.IdBook);
             Assert.Equal(typeId, result.Type);
             Assert.Equal(title, result.Title);
             Assert.Equal(message, result.Message);
@@ -97,7 +97,7 @@ namespace SGBL.Application.Tests.Services
             Assert.NotNull(capturedNotification);
             Assert.Equal(userId, capturedNotification!.IdUser);
             Assert.Equal(loanId, capturedNotification.IdLoan);
-            Assert.Equal(0, capturedNotification.IdBook);
+            Assert.Null(capturedNotification.IdBook);
             Assert.Equal(1, capturedNotification.Status);
             Assert.Null(capturedNotification.ReadDate);
 

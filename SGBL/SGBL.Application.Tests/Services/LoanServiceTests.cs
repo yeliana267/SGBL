@@ -42,13 +42,15 @@ namespace SGBL.Application.Tests.Services
         [Fact]
         public async Task AddAsync_Should_CreateLoan_AndDecreaseBookStock()
         {
+            var now = DateTime.UtcNow;
+
             var dto = new LoanDto
             {
                 IdBook = 1,
                 IdUser = 2,
                 IdLibrarian = 3,
-                PickupDeadline = DateTime.Now.AddDays(1),
-                DueDate = DateTime.Now.AddDays(7)
+                PickupDeadline = now.AddDays(1),
+                DueDate = now.AddDays(7)
             };
 
             var book = new Book { Id = 1, AvailableCopies = 2, TotalCopies = 5 };
@@ -77,13 +79,15 @@ namespace SGBL.Application.Tests.Services
         [Fact]
         public async Task UpdateAsync_ToPickedUp_Should_SetPickupDate()
         {
+            var now = DateTime.UtcNow;
+
             var existingLoan = new Loan
             {
                 Id = 20,
                 IdBook = 5,
                 Status = 1,
-                PickupDeadline = DateTime.Now.AddHours(-1),
-                DueDate = DateTime.Now.AddDays(5),
+                PickupDeadline = now.AddHours(-1),
+                DueDate = now.AddDays(5),
                 PickupDate = default,
                 ReturnDate = default
             };
@@ -111,14 +115,16 @@ namespace SGBL.Application.Tests.Services
         [Fact]
         public async Task UpdateAsync_ToReturned_Should_IncreaseBookStock()
         {
+            var now = DateTime.UtcNow;
+
             var existingLoan = new Loan
             {
                 Id = 30,
                 IdBook = 7,
                 Status = 2,
-                PickupDeadline = DateTime.Now.AddDays(-2),
-                DueDate = DateTime.Now.AddDays(3),
-                PickupDate = DateTime.Now.AddDays(-1),
+                PickupDeadline = now.AddDays(-2),
+                DueDate = now.AddDays(3),
+                PickupDate = now.AddDays(-1),
                 ReturnDate = default
             };
 
@@ -154,7 +160,7 @@ namespace SGBL.Application.Tests.Services
                     Id = 40,
                     IdBook = 11,
                     Status = 1,
-                    PickupDeadline = DateTime.Now.AddDays(-2),
+                    PickupDeadline = DateTime.UtcNow.AddDays(-2),
                     PickupDate = default,
                     ReturnDate = default,
                     Notes = string.Empty

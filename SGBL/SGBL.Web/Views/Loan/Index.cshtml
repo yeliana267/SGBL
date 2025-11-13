@@ -1,7 +1,12 @@
 ﻿@model SGBL.Application.ViewModels.LoanViewModel
+@using System.Linq
+@using SGBL.Application.ViewModels
 @{
     ViewData["Title"] = "Gestión de Préstamos";
-    var loanList = ViewData["LoanList"] as List<SGBL.Application.ViewModels.LoanViewModel> ?? new List<SGBL.Application.ViewModels.LoanViewModel>();
+    var loanList = ViewData["LoanList"] as List<LoanViewModel> ?? new List<LoanViewModel>();
+    var loansDueSoon = ViewBag.LoansDueSoon as List<LoanViewModel> ?? new List<LoanViewModel>();
+    var cancelledLoans = ViewBag.CancelledLoans as int? ?? 0;
+    var loansDueSoonCount = ViewBag.LoansDueSoonCount as int? ?? loansDueSoon.Count;
 }
 
 <div class="container-fluid">
@@ -11,6 +16,54 @@
         <a href="@Url.Action("Create")" class="btn btn-primary">
             <i class="fas fa-plus-circle"></i> Nuevo Préstamo
         </a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-start-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Préstamos registrados</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@loanList.Count</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-book fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-start-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Vencen en los próximos días</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@loansDueSoonCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-start-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Cancelados por no recoger</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@cancelledLoans</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-ban fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     @if (TempData["Error"] != null)
@@ -107,6 +160,30 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    }
+
+    @if (loansDueSoon.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-warning"><i class="fas fa-bell me-2"></i>Préstamos próximos a vencer</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    @foreach (var loan in loansDueSoon)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>
+                                <strong>Préstamo #@loan.Id</strong> para el usuario <strong>@loan.IdUser</strong> vence el <strong>@loan.DueDate.ToString("dd/MM/yyyy")</strong>.
+                            </span>
+                            <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Edit", new { id = loan.Id })">
+                                <i class="fas fa-paper-plane"></i> Revisar
+                            </a>
+                        </li>
+                    }
+                </ul>
             </div>
         </div>
     }
