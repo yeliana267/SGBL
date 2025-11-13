@@ -10,6 +10,6 @@ namespace SGBL.Application.Dtos.Notification
         public int Status { get; set; }
         public int IdBook { get; set; }
         public int IdLoan { get; set; }
-        public DateTime ReadDate { get; set; }
+        public DateTime? ReadDate { get; set; }
     }
 }

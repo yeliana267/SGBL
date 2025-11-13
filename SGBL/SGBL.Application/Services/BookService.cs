@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using SGBL.Application.Dtos.Author;
 using SGBL.Application.Dtos.Book;
@@ -117,12 +120,20 @@ namespace SGBL.Application.Services
 
         public async Task DecreaseAvailableCopies(int bookId)
         {
-            throw new NotImplementedException();
+            var updated = await _bookRepository.AdjustAvailableCopiesAsync(bookId, -1);
+            if (updated is null)
+            {
+                throw new KeyNotFoundException($"No se encontró el libro con id {bookId}.");
+            }
         }
 
         public async Task IncreaseAvailableCopies(int bookId)
         {
-            throw new NotImplementedException();
+            var updated = await _bookRepository.AdjustAvailableCopiesAsync(bookId, 1);
+            if (updated is null)
+            {
+                throw new KeyNotFoundException($"No se encontró el libro con id {bookId}.");
+            }
         }
         public async Task<PagedResultDto> SearchBooksPagedAsync(
     string? title,

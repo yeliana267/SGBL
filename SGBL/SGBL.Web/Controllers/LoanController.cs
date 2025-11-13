@@ -1,11 +1,13 @@
-﻿using System.ComponentModel.Design;
-using Application.Interfaces.Services;
+﻿using Application.Interfaces.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using SGBL.Application.Dtos.Email;
 using SGBL.Application.Dtos.Loan;
 using SGBL.Application.Interfaces;
 using SGBL.Application.ViewModels;
+using System.ComponentModel.Design;
 
 namespace SGBL.Web.Controllers
 {
@@ -14,22 +16,34 @@ namespace SGBL.Web.Controllers
         private readonly ILoanService _loanService;
         private readonly ILoanStatusService _loanStatusService;
         private readonly IBookService _bookService;
+        private readonly IUserService _userService;
+        private readonly ILogger<LoanController> _logger;
         private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
+        private const int LoanStatusPending = 1;
+        private const int LoanStatusPickedUp = 2;
+        private const int LoanStatusReturned = 3;
 
-        public LoanController(ILoanService loanService, ILoanStatusService loanStatusService, IBookService bookService, IEmailService emailService, IMapper mapper)
+        public LoanController(ILoanService loanService, ILoanStatusService loanStatusService, IBookService bookService, IEmailService emailService, IUserService userService, IMapper mapper, ILogger<LoanController> logger)
         {
             _loanService = loanService;
             _loanStatusService = loanStatusService;
             _bookService = bookService;
             _emailService = emailService;
+            _userService = userService;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
         {
             try
             {
+                var cancelledCount = await _loanService.CancelLoansNotPickedUpAsync();
+                ViewBag.CancelledLoans = cancelledCount;
+
+                var dueSoon = await _loanService.GetLoansDueInDays(2);
+                ViewBag.LoansDueSoon = dueSoon;
                 var loanDtos = await _loanService.GetAll();
                 var statusDtos = await _loanStatusService.GetAll();
                 var loanVm = _mapper.Map<List<LoanViewModel>>(loanDtos);
@@ -54,7 +68,7 @@ namespace SGBL.Web.Controllers
                 ReturnDate = null,
                 PickupDate = null,
                 PickupDeadline = DateTime.Now.AddDays(1), // 24 horas para recoger
-                Status = 1, // 1 = Pending (asumiendo que 1 es el estado "Pendiente")
+                Status = LoanStatusPending,
                 FineAmount = 0,
                 Notes = string.Empty,
                 CreatedAt = DateTime.Now,
@@ -78,24 +92,14 @@ namespace SGBL.Web.Controllers
 
                     // Configurar fechas y estado
                     model.PickupDeadline = DateTime.Now.AddDays(1); // 24 horas para recoger
-                    model.Status = 1; // Estado: Pendiente
+                    model.Status = LoanStatusPending;
                     model.DateLoan = DateTime.Now;
                     model.DueDate = DateTime.Now.AddDays(7); // 7 días para devolver
 
                     var loanDto = _mapper.Map<LoanDto>(model);
                     var result = await _loanService.AddAsync(loanDto);
-
-                    if (result.Status == 1)
-                    {
-                        // Disminuir la cantidad disponible del libro
-                        await _bookService.DecreaseAvailableCopies(model.IdBook);
-
-                        // Enviar email de notificación
-                        await SendLoanConfirmationEmail(loanDto);
-
-                        return RedirectToAction(nameof(Index));
-                    }
-                  
+                    await SendLoanConfirmationEmail(loanDto);
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
@@ -135,24 +139,22 @@ namespace SGBL.Web.Controllers
 
                     var result = await _loanService.UpdateAsync(dto, dto.Id);
 
-                    if (result.Status == 1)
-                    {
-                        // Si el estado cambió a "Recogido" (asumiendo que 2 es "Recogido")
-                        if (vm.Status == 2 && existingLoan.Status != 2)
+                        if (result != null)
                         {
-                            await SendBookPickedUpNotification(dto);
+                                // Si el estado cambió a "Recogido"
+                                if (vm.Status == LoanStatusPickedUp && existingLoan.Status != LoanStatusPickedUp)
+                                {
+                                    await SendBookPickedUpNotification(dto);
+                                }
+                                // Si el estado cambió a "Devuelto"
+                                if (vm.Status == LoanStatusReturned && existingLoan.Status != LoanStatusReturned)
+                                {
+                                    await SendBookReturnedNotification(dto);
+                                }
+
+                            return RedirectToAction(nameof(Index));
                         }
 
-                        // Si el estado cambió a "Devuelto" (asumiendo que 3 es "Devuelto")
-                        if (vm.Status == 3 && existingLoan.Status != 3)
-                        {
-                            await _bookService.IncreaseAvailableCopies(vm.IdBook);
-                            await SendBookReturnedNotification(dto);
-                        }
-
-                        return RedirectToAction(nameof(Index));
-                    }
-                  
                 }
                 catch (Exception ex)
                 {
@@ -170,7 +172,7 @@ namespace SGBL.Web.Controllers
                 var loan = await _loanService.GetById(id);
 
                 // Verificar si el préstamo está activo (no se puede eliminar)
-                if (loan.Status == 1 || loan.Status == 2) // 1 = Pendiente, 2 = Recogido
+                if (loan.Status == LoanStatusPending || loan.Status == LoanStatusPickedUp)
                 {
                     TempData["Error"] = "No se puede eliminar un préstamo activo.";
                     return RedirectToAction(nameof(Index));
@@ -201,10 +203,16 @@ namespace SGBL.Web.Controllers
                         <li>Fecha de devolución: {loanDto.DueDate:dd/MM/yyyy}</li>
                     </ul>
                     <p>Si no recoge el libro en el plazo establecido, el préstamo será cancelado automáticamente.</p>";
+                var email = await GetUserEmailAsync(loanDto.IdUser);
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    _logger.LogWarning("No se envió correo de confirmación porque el usuario {UserId} no tiene email registrado.", loanDto.IdUser);
+                    return;
+                }
 
                 await _emailService.SendAsync(new EmailRequestDto()
                 {
-                    To = "user@email.com", // Aquí deberías obtener el email del usuario
+                    To = email,
                     Subject = "Confirmación de Préstamo - Biblioteca",
                     HtmlBody = emailBody
                 });
@@ -212,7 +220,7 @@ namespace SGBL.Web.Controllers
             catch (Exception ex)
             {
                 // Log the error but don't break the flow
-                Console.WriteLine($"Error sending email: {ex.Message}");
+                _logger.LogError(ex, "Error enviando correo de confirmación para el préstamo {LoanId}.", loanDto.Id);
             }
         }
 
@@ -228,17 +236,23 @@ namespace SGBL.Web.Controllers
                         <li>Fecha de devolución: {loanDto.DueDate:dd/MM/yyyy}</li>
                         <li>Recuerde devolver el libro a tiempo para evitar multas</li>
                     </ul>";
+                var email = await GetUserEmailAsync(loanDto.IdUser);
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    _logger.LogWarning("No se envió correo de recogida porque el usuario {UserId} no tiene email registrado.", loanDto.IdUser);
+                    return;
+                }
 
                 await _emailService.SendAsync(new EmailRequestDto()
                 {
-                    To = "user@email.com", // Aquí deberías obtener el email del usuario
+                    To = email, // Aquí deberías obtener el email del usuario
                     Subject = "Libro Recogido - Biblioteca",
                     HtmlBody = emailBody
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending pickup notification: {ex.Message}");
+                _logger.LogError(ex, "Error enviando correo de recogida para el préstamo {LoanId}.", loanDto.Id);
             }
         }
 
@@ -250,21 +264,38 @@ namespace SGBL.Web.Controllers
                     <h3>Libro Devuelto</h3>
                     <p>El libro ha sido devuelto exitosamente.</p>
                     <p>¡Gracias por usar nuestro servicio de biblioteca!</p>";
-
+                var email = await GetUserEmailAsync(loanDto.IdUser);
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    _logger.LogWarning("No se envió correo de devolución porque el usuario {UserId} no tiene email registrado.", loanDto.IdUser);
+                    return;
+                }
                 await _emailService.SendAsync(new EmailRequestDto()
                 {
-                    To = "user@email.com", // Aquí deberías obtener el email del usuario
+                    To = email,
                     Subject = "Libro Devuelto - Biblioteca",
                     HtmlBody = emailBody
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending return notification: {ex.Message}");
+                _logger.LogError(ex, "Error enviando correo de devolución para el préstamo {LoanId}.", loanDto.Id);
             }
         }
 
-        // Método para notificar 2 días antes de la devolución (debería ejecutarse como background job)
-        
+        private async Task<string?> GetUserEmailAsync(int userId)
+        {
+            try
+            {
+                var user = await _userService.GetById(userId);
+                return user?.Email;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "No se pudo obtener el correo electrónico del usuario {UserId}.", userId);
+                return null;
+            }
+        }
+
     }
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using SGBL.Application.Interfaces;
 using SGBL.Domain.Entities;
 using SGBL.Domain.Interfaces;
@@ -54,6 +56,30 @@ namespace SGBL.Persistence.Repositories
 
             return (books, totalCount);
         }
+        public async Task<Book?> AdjustAvailableCopiesAsync(int bookId, int delta)
+        {
+            var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == bookId);
+            if (book is null)
+            {
+                return null;
+            }
+
+            var newAvailable = book.AvailableCopies + delta;
+            if (newAvailable < 0)
+            {
+                throw new InvalidOperationException("No hay copias disponibles suficientes.");
+            }
+
+            if (newAvailable > book.TotalCopies)
+            {
+                throw new InvalidOperationException("Las copias disponibles no pueden exceder el total de copias.");
+            }
+
+            book.AvailableCopies = newAvailable;
+            await _context.SaveChangesAsync();
+            return book;
+        }
+
 
     }
 }
