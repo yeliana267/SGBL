@@ -22,22 +22,31 @@ namespace SGBL.Persistence.Repositories
         }
         public async Task<List<Loan>> GetLoansDueInDaysAsync(int days)
         {
-            var today = DateTime.Now.Date;
-            var limit = today.AddDays(days);
+            var today = DateTime.UtcNow.Date;
+            var limit = today.AddDays(days + 1);
 
             return await _context.Loans
                 .AsNoTracking()
-                .Where(loan => loan.DueDate.Date >= today && loan.DueDate.Date <= limit && loan.ReturnDate == default)
+                .Where(loan => loan.ReturnDate == null
+                               && loan.DueDate >= today
+                               && loan.DueDate < limit)
                 .ToListAsync();
         }
 
         public async Task<List<Loan>> GetPendingLoansPastPickupDeadlineAsync(DateTime referenceDate, int pendingStatus)
         {
+            var utcReference = referenceDate.Kind switch
+            {
+                DateTimeKind.Unspecified => DateTime.SpecifyKind(referenceDate, DateTimeKind.Utc),
+                DateTimeKind.Local => referenceDate.ToUniversalTime(),
+                _ => referenceDate
+            };
+
             return await _context.Loans
                 .Where(loan => loan.Status == pendingStatus
-                               && loan.PickupDeadline < referenceDate
-                               && loan.PickupDate == default
-                               && loan.ReturnDate == default)
+                               && loan.PickupDeadline < utcReference
+                               && loan.PickupDate == null
+                               && loan.ReturnDate == null)
                 .ToListAsync();
         }
 

@@ -51,8 +51,8 @@
                     </td>
                     <td>@notification.StatusDescription</td>
                     <td>@notification.Type</td>
-                    <td>@(notification.IdBook > 0 ? notification.IdBook.ToString() : "-")</td>
-                    <td>@(notification.IdLoan > 0 ? notification.IdLoan.ToString() : "-")</td>
+                    <td>@(notification.IdBook.HasValue ? notification.IdBook.Value.ToString() : "-")</td>
+                    <td>@(notification.IdLoan.HasValue ? notification.IdLoan.Value.ToString() : "-")</td>
                     @if (showActions)
                     {
                         <td>

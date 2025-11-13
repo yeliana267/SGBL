@@ -70,6 +70,8 @@ namespace SGBL.Web
                     !path.StartsWithSegments("/Admin") &&
                     !path.StartsWithSegments("/UserDashboard") &&
                     !path.StartsWithSegments("/Bibliotecario") &&
+                    !path.StartsWithSegments("/Loan") &&
+                    !path.StartsWithSegments("/Notification") &&
                     !path.StartsWithSegments("/api") &&
                     !path.StartsWithSegments("/dev"))
                 {

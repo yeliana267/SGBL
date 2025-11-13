@@ -32,7 +32,7 @@ namespace SGBL.Application.Services
         {
             var notification = InitializeBaseNotification(userId, typeId, title, message);
             notification.IdLoan = loanId;
-            notification.IdBook = 0;
+            notification.IdBook = null;
             return await CreateNotificationAsync(notification, sendEmail, email);
         }
 
@@ -40,15 +40,15 @@ namespace SGBL.Application.Services
         {
             var notification = InitializeBaseNotification(userId, typeId, title, message);
             notification.IdBook = bookId;
-            notification.IdLoan = 0;
+            notification.IdLoan = null;
             return await CreateNotificationAsync(notification, sendEmail, email);
         }
 
         public async Task<NotificationDto?> CreateUserNotificationAsync(int userId, int typeId, string title, string message, bool sendEmail = false, string? email = null)
         {
             var notification = InitializeBaseNotification(userId, typeId, title, message);
-            notification.IdBook = 0;
-            notification.IdLoan = 0;
+            notification.IdBook = null;
+            notification.IdLoan = null;
             return await CreateNotificationAsync(notification, sendEmail, email);
         }
 

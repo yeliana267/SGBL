@@ -1,20 +1,18 @@
-﻿using Application.Interfaces.Services;
+﻿using System;
+using System.Collections.Generic;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SGBL.Application.Dtos.Email;
 using SGBL.Application.Dtos.Loan;
 using SGBL.Application.Interfaces;
 using SGBL.Application.ViewModels;
-using System.ComponentModel.Design;
 
 namespace SGBL.Web.Controllers
 {
     public class LoanController : Controller
     {
         private readonly ILoanService _loanService;
-        private readonly ILoanStatusService _loanStatusService;
         private readonly IBookService _bookService;
         private readonly IUserService _userService;
         private readonly ILogger<LoanController> _logger;
@@ -24,10 +22,9 @@ namespace SGBL.Web.Controllers
         private const int LoanStatusPickedUp = 2;
         private const int LoanStatusReturned = 3;
 
-        public LoanController(ILoanService loanService, ILoanStatusService loanStatusService, IBookService bookService, IEmailService emailService, IUserService userService, IMapper mapper, ILogger<LoanController> logger)
+        public LoanController(ILoanService loanService, IBookService bookService, IEmailService emailService, IUserService userService, IMapper mapper, ILogger<LoanController> logger)
         {
             _loanService = loanService;
-            _loanStatusService = loanStatusService;
             _bookService = bookService;
             _emailService = emailService;
             _userService = userService;
@@ -43,36 +40,30 @@ namespace SGBL.Web.Controllers
                 ViewBag.CancelledLoans = cancelledCount;
 
                 var dueSoon = await _loanService.GetLoansDueInDays(2);
-                ViewBag.LoansDueSoon = dueSoon;
+                var dueSoonVm = _mapper.Map<List<LoanViewModel>>(dueSoon);
+                ViewBag.LoansDueSoon = dueSoonVm;
+                ViewBag.LoansDueSoonCount = dueSoonVm.Count;
+
                 var loanDtos = await _loanService.GetAll();
-                var statusDtos = await _loanStatusService.GetAll();
                 var loanVm = _mapper.Map<List<LoanViewModel>>(loanDtos);
-                return View(loanVm);
+
+                ViewData["LoanList"] = loanVm;
+
+                return View(CreateDefaultLoanViewModel());
             }
             catch (Exception ex)
             {
-                return View(new List<LoanViewModel>());
+                ViewBag.CancelledLoans = 0;
+                ViewBag.LoansDueSoon = new List<LoanViewModel>();
+                ViewBag.LoansDueSoonCount = 0;
+                ViewData["LoanList"] = new List<LoanViewModel>();
+                return View(CreateDefaultLoanViewModel());
             }
         }
 
         public IActionResult Create()
         {
-            return View(new LoanViewModel()
-            {
-                Id = 0,
-                IdBook = 0,
-                IdUser = 0,
-                IdLibrarian = 0,
-                DateLoan = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(7),
-                ReturnDate = null,
-                PickupDate = null,
-                PickupDeadline = DateTime.Now.AddDays(1), // 24 horas para recoger
-                Status = LoanStatusPending,
-                FineAmount = 0,
-                Notes = string.Empty,
-                CreatedAt = DateTime.Now,
-            });
+            return View(CreateDefaultLoanViewModel());
         }
 
         [HttpPost]
@@ -91,10 +82,11 @@ namespace SGBL.Web.Controllers
                     }
 
                     // Configurar fechas y estado
-                    model.PickupDeadline = DateTime.Now.AddDays(1); // 24 horas para recoger
+                    var now = DateTime.UtcNow;
+                    model.PickupDeadline = now.AddDays(1); // 24 horas para recoger
                     model.Status = LoanStatusPending;
-                    model.DateLoan = DateTime.Now;
-                    model.DueDate = DateTime.Now.AddDays(7); // 7 días para devolver
+                    model.DateLoan = now;
+                    model.DueDate = now.AddDays(7); // 7 días para devolver
 
                     var loanDto = _mapper.Map<LoanDto>(model);
                     var result = await _loanService.AddAsync(loanDto);
@@ -107,6 +99,28 @@ namespace SGBL.Web.Controllers
                 }
             }
             return View(model);
+        }
+
+        private LoanViewModel CreateDefaultLoanViewModel()
+        {
+            var now = DateTime.UtcNow;
+
+            return new LoanViewModel
+            {
+                Id = 0,
+                IdBook = 0,
+                IdUser = 0,
+                IdLibrarian = 0,
+                DateLoan = now,
+                DueDate = now.AddDays(7),
+                ReturnDate = null,
+                PickupDate = null,
+                PickupDeadline = now.AddDays(1),
+                Status = LoanStatusPending,
+                FineAmount = 0,
+                Notes = string.Empty,
+                CreatedAt = now,
+            };
         }
 
         public async Task<IActionResult> Edit(int id)
@@ -135,7 +149,7 @@ namespace SGBL.Web.Controllers
                     }
 
                     var dto = _mapper.Map<LoanDto>(vm);
-                    dto.UpdatedAt = DateTime.Now;
+                    dto.UpdatedAt = DateTime.UtcNow;
 
                     var result = await _loanService.UpdateAsync(dto, dto.Id);
 
