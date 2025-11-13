@@ -85,14 +85,26 @@ namespace SGBL.Application.Services
                 throw new InvalidOperationException("El libro no tiene copias disponibles para préstamo.");
             }
 
+            var utcNow = DateTime.UtcNow;
+
             dto.Status = LoanStatusPending;
-            dto.DateLoan = EnsureUtc(dto.DateLoan == default ? DateTime.UtcNow : dto.DateLoan);
-            dto.DueDate = EnsureUtc(dto.DueDate == default ? dto.DateLoan.AddDays(7) : dto.DueDate);
-            dto.PickupDeadline = EnsureUtc(dto.PickupDeadline ?? dto.DateLoan.AddDays(1));
+            dto.FineAmount ??= 0m;
+
+            var loanDate = dto.DateLoan.HasValue && dto.DateLoan.Value != default
+                ? dto.DateLoan.Value
+                : utcNow;
+            loanDate = EnsureUtc(loanDate);
+
+            dto.DateLoan = loanDate;
+            dto.DueDate = EnsureUtc(dto.DueDate == default ? loanDate.AddDays(7) : dto.DueDate);
+
+            var pickupDeadline = dto.PickupDeadline == default ? loanDate.AddDays(1) : dto.PickupDeadline;
+            dto.PickupDeadline = EnsureUtc(pickupDeadline);
+
             dto.PickupDate = EnsureUtc(dto.PickupDate);
             dto.ReturnDate = EnsureUtc(dto.ReturnDate);
-            dto.CreatedAt = EnsureUtc(dto.CreatedAt == default ? DateTime.UtcNow : dto.CreatedAt);
-            dto.UpdatedAt = EnsureUtc(dto.UpdatedAt ?? DateTime.UtcNow);
+            dto.CreatedAt = EnsureUtc(dto.CreatedAt == default ? utcNow : dto.CreatedAt);
+            dto.UpdatedAt = EnsureUtc(dto.UpdatedAt ?? utcNow);
 
             await _bookRepository.AdjustAvailableCopiesAsync(dto.IdBook, -1);
 
@@ -121,21 +133,41 @@ namespace SGBL.Application.Services
                 return null;
             }
 
-            var previousStatus = existing.Status;
+            var previousStatus = existing.Status ?? LoanStatusPending;
+
+            dto.Status ??= previousStatus;
+            dto.FineAmount ??= existing.FineAmount ?? 0m;
+
+            if (!dto.DateLoan.HasValue || dto.DateLoan.Value == default)
+            {
+                dto.DateLoan = existing.DateLoan ?? existing.CreatedAt;
+            }
+
+            if (dto.DueDate == default)
+            {
+                dto.DueDate = existing.DueDate;
+            }
+
+            if (dto.PickupDeadline == default)
+            {
+                dto.PickupDeadline = existing.PickupDeadline;
+            }
 
             dto.DateLoan = EnsureUtc(dto.DateLoan);
             dto.DueDate = EnsureUtc(dto.DueDate);
             dto.PickupDeadline = EnsureUtc(dto.PickupDeadline);
             dto.PickupDate = EnsureUtc(dto.PickupDate);
             dto.ReturnDate = EnsureUtc(dto.ReturnDate);
-            dto.CreatedAt = EnsureUtc(dto.CreatedAt == default ? DateTime.UtcNow : dto.CreatedAt);
+            dto.CreatedAt = EnsureUtc(dto.CreatedAt == default ? existing.CreatedAt : dto.CreatedAt);
 
-            if (previousStatus != LoanStatusPickedUp && dto.Status == LoanStatusPickedUp && !dto.PickupDate.HasValue)
+            var newStatus = dto.Status ?? LoanStatusPending;
+
+            if (previousStatus != LoanStatusPickedUp && newStatus == LoanStatusPickedUp && !dto.PickupDate.HasValue)
             {
                 dto.PickupDate = DateTime.UtcNow;
             }
 
-            var shouldRestoreStock = previousStatus != LoanStatusReturned && dto.Status == LoanStatusReturned;
+            var shouldRestoreStock = previousStatus != LoanStatusReturned && newStatus == LoanStatusReturned;
             if (shouldRestoreStock && !dto.ReturnDate.HasValue)
             {
                 dto.ReturnDate = DateTime.UtcNow;

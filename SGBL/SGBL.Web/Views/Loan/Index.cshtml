@@ -129,14 +129,15 @@
                                     <td>@loan.Id</td>
                                     <td>@loan.IdBook</td>
                                     <td>@loan.IdUser</td>
-                                    <td>@loan.DateLoan.ToString("dd/MM/yyyy")</td>
+                                    <td>@(loan.DateLoan?.ToString("dd/MM/yyyy") ?? "-")</td>
                                     <td>@loan.DueDate.ToString("dd/MM/yyyy")</td>
                                     <td>
-                                        @GetStatusBadge(loan.Status)
+                                        @Html.Raw(GetStatusBadge(loan.Status))
                                     </td>
                                     <td>
-                                        <span class="@(loan.FineAmount > 0 ? "text-danger fw-bold" : "text-success")">
-                                            $@loan.FineAmount.ToString("N2")
+                                        @{ var fineAmount = loan.FineAmount ?? 0m; }
+                                        <span class="@(fineAmount > 0 ? "text-danger fw-bold" : "text-success")">
+                                            $@fineAmount.ToString("N2")
                                         </span>
                                     </td>
                                     <td>
@@ -353,9 +354,9 @@
 }
 
 @functions {
-    public string GetStatusBadge(int status)
+    public string GetStatusBadge(int? status)
     {
-        return status switch
+        return (status ?? 0) switch
         {
             1 => "<span class='badge bg-warning'>Pendiente</span>",
             2 => "<span class='badge bg-primary'>Recogido</span>",

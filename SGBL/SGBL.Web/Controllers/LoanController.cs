@@ -83,9 +83,10 @@ namespace SGBL.Web.Controllers
 
                     // Configurar fechas y estado
                     var now = DateTime.UtcNow;
+                    model.DateLoan = now;
                     model.PickupDeadline = now.AddDays(1); // 24 horas para recoger
                     model.Status = LoanStatusPending;
-                    model.DateLoan = now;
+                    model.FineAmount ??= 0m;
                     model.DueDate = now.AddDays(7); // 7 días para devolver
 
                     var loanDto = _mapper.Map<LoanDto>(model);
@@ -110,14 +111,14 @@ namespace SGBL.Web.Controllers
                 Id = 0,
                 IdBook = 0,
                 IdUser = 0,
-                IdLibrarian = 0,
+                IdLibrarian = null,
                 DateLoan = now,
                 DueDate = now.AddDays(7),
                 ReturnDate = null,
                 PickupDate = null,
                 PickupDeadline = now.AddDays(1),
                 Status = LoanStatusPending,
-                FineAmount = 0,
+                FineAmount = 0m,
                 Notes = string.Empty,
                 CreatedAt = now,
             };

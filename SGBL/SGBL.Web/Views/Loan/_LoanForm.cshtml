@@ -1,0 +1,78 @@
+@model SGBL.Application.ViewModels.LoanViewModel
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <label asp-for="IdBook" class="form-label">ID Libro *</label>
+        <input asp-for="IdBook" class="form-control" type="number" min="1" required />
+        <span asp-validation-for="IdBook" class="text-danger"></span>
+    </div>
+    <div class="col-md-4 mb-3">
+        <label asp-for="IdUser" class="form-label">ID Usuario *</label>
+        <input asp-for="IdUser" class="form-control" type="number" min="1" required />
+        <span asp-validation-for="IdUser" class="text-danger"></span>
+    </div>
+    <div class="col-md-4 mb-3">
+        <label asp-for="IdLibrarian" class="form-label">ID Bibliotecario</label>
+        <input asp-for="IdLibrarian" class="form-control" type="number" min="1" />
+        <span asp-validation-for="IdLibrarian" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label asp-for="DateLoan" class="form-label">Fecha Préstamo</label>
+        <input asp-for="DateLoan" class="form-control" type="datetime-local" />
+        <span asp-validation-for="DateLoan" class="text-danger"></span>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label asp-for="DueDate" class="form-label">Fecha Devolución *</label>
+        <input asp-for="DueDate" class="form-control" type="datetime-local" required />
+        <span asp-validation-for="DueDate" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label asp-for="PickupDeadline" class="form-label">Fecha Límite de Retiro *</label>
+        <input asp-for="PickupDeadline" class="form-control" type="datetime-local" required />
+        <span asp-validation-for="PickupDeadline" class="text-danger"></span>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label asp-for="PickupDate" class="form-label">Fecha de Retiro</label>
+        <input asp-for="PickupDate" class="form-control" type="datetime-local" />
+        <span asp-validation-for="PickupDate" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label asp-for="ReturnDate" class="form-label">Fecha de Devolución</label>
+        <input asp-for="ReturnDate" class="form-control" type="datetime-local" />
+        <span asp-validation-for="ReturnDate" class="text-danger"></span>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label asp-for="Status" class="form-label">Estado *</label>
+        <select asp-for="Status" class="form-select" required>
+            <option value="1">Pendiente</option>
+            <option value="2">Recogido</option>
+            <option value="3">Devuelto</option>
+            <option value="4">Vencido</option>
+            <option value="5">Cancelado</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label asp-for="FineAmount" class="form-label">Monto Multa</label>
+        <input asp-for="FineAmount" class="form-control" type="number" step="0.01" min="0" />
+        <span asp-validation-for="FineAmount" class="text-danger"></span>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label asp-for="Notes" class="form-label">Notas</label>
+        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+</div>
+
