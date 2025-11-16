@@ -59,6 +59,22 @@
     </div>
 </form>
 
+@if (TempData["LoanSuccess"] is string loanSuccess)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@loanSuccess
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["LoanError"] is string loanError)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>@loanError
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <script>
     function validateSearch() {
     var title = document.getElementById("title").value.trim();
@@ -218,7 +234,7 @@ else if (action == "showbook")
                     </div>
 
             <!-- Estado y acción -->
-            <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
                 <div>
                     <h6 class="mb-0">
                         <span class="fw-semibold">Estado:</span>
@@ -253,9 +269,19 @@ else if (action == "showbook")
                                 <span class="badge @badgeClass">@statusText</span>
                     </h6>
                 </div>
-                <button class="btn btn-warning btn-sm">
-                    <i class="fas fa-bell me-2"></i>Recordarme
-                </button>
+                <div class="d-flex flex-column align-items-end gap-2">
+                    <form asp-controller="UserDashboard" asp-action="RequestLoan" method="post" class="d-flex flex-column align-items-end">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="bookId" value="@book.Id" />
+                        <button type="submit" class="btn btn-primary btn-sm" @(book.AvailableCopies <= 0 ? "disabled" : null)>
+                            <i class="fas fa-book-reader me-2"></i>Solicitar préstamo
+                        </button>
+                    </form>
+                    @if (book.AvailableCopies <= 0)
+                    {
+                        <small class="text-muted text-end">Registra un recordatorio cuando no haya copias.</small>
+                    }
+                </div>
             </div>
         </div>
     </div>

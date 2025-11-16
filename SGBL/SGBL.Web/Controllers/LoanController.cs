@@ -1,5 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -7,9 +5,12 @@ using SGBL.Application.Dtos.Email;
 using SGBL.Application.Dtos.Loan;
 using SGBL.Application.Interfaces;
 using SGBL.Application.ViewModels;
+using System;
+using System.Collections.Generic;
 
 namespace SGBL.Web.Controllers
 {
+    [Authorize(Roles = "9")]
     public class LoanController : Controller
     {
         private readonly ILoanService _loanService;
@@ -17,12 +18,11 @@ namespace SGBL.Web.Controllers
         private readonly IUserService _userService;
         private readonly ILogger<LoanController> _logger;
         private readonly IEmailService _emailService;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
-        private const int LoanStatusPending = 1;
-        private const int LoanStatusPickedUp = 2;
-        private const int LoanStatusReturned = 3;
+        private readonly ILogger<LoanController> _logger;
 
-        public LoanController(ILoanService loanService, IBookService bookService, IEmailService emailService, IUserService userService, IMapper mapper, ILogger<LoanController> logger)
+        public LoanController(ILoanService loanService, ILoanStatusService loanStatusService, IBookService bookService, IEmailService emailService, IUserService userService, IMapper mapper, ILogger<LoanController> logger)
         {
             _loanService = loanService;
             _bookService = bookService;
@@ -63,12 +63,29 @@ namespace SGBL.Web.Controllers
 
         public IActionResult Create()
         {
-            return View(CreateDefaultLoanViewModel());
+            return View(new LoanViewModel()
+            {
+                Id = 0,
+                IdBook = 0,
+                IdUser = 0,
+                IdLibrarian = null,
+                DateLoan = DateTime.UtcNow,
+                DueDate = DateTime.UtcNow.AddDays(7),
+                ReturnDate = null,
+                PickupDate = null,
+                PickupDeadline = DateTime.UtcNow.AddDays(1), // 24 horas para recoger
+                Status = 1, // 1 = Pending (asumiendo que 1 es el estado "Pendiente")
+                FineAmount = 0,
+                Notes = string.Empty,
+                CreatedAt = DateTime.UtcNow,
+            });
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(LoanViewModel model)
         {
+            model.Notes ??= string.Empty;
+
             if (ModelState.IsValid)
             {
                 try
@@ -82,16 +99,25 @@ namespace SGBL.Web.Controllers
                     }
 
                     // Configurar fechas y estado
-                    var now = DateTime.UtcNow;
-                    model.PickupDeadline = now.AddDays(1); // 24 horas para recoger
-                    model.Status = LoanStatusPending;
-                    model.DateLoan = now;
-                    model.DueDate = now.AddDays(7); // 7 días para devolver
+                    model.PickupDeadline = DateTime.UtcNow.AddDays(1); // 24 horas para recoger
+                    model.Status = 1; // Estado: Pendiente
+                    model.DateLoan = DateTime.UtcNow;
+                    model.DueDate = DateTime.UtcNow.AddDays(7); // 7 días para devolver
 
                     var loanDto = _mapper.Map<LoanDto>(model);
                     var result = await _loanService.AddAsync(loanDto);
-                    await SendLoanConfirmationEmail(loanDto);
-                    return RedirectToAction(nameof(Index));
+
+                    if (result?.Status == 1)
+                    {
+                        // Disminuir la cantidad disponible del libro
+                        await _bookService.DecreaseAvailableCopies(model.IdBook);
+
+                        // Enviar email de notificación
+                        await SendLoanConfirmationEmail(loanDto);
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                  
                 }
                 catch (Exception ex)
                 {
@@ -110,14 +136,14 @@ namespace SGBL.Web.Controllers
                 Id = 0,
                 IdBook = 0,
                 IdUser = 0,
-                IdLibrarian = 0,
+                IdLibrarian = null,
                 DateLoan = now,
                 DueDate = now.AddDays(7),
                 ReturnDate = null,
                 PickupDate = null,
                 PickupDeadline = now.AddDays(1),
                 Status = LoanStatusPending,
-                FineAmount = 0,
+                FineAmount = 0m,
                 Notes = string.Empty,
                 CreatedAt = now,
             };
@@ -185,14 +211,13 @@ namespace SGBL.Web.Controllers
             {
                 var loan = await _loanService.GetById(id);
 
-                // Verificar si el préstamo está activo (no se puede eliminar)
-                if (loan.Status == LoanStatusPending || loan.Status == LoanStatusPickedUp)
+                if (loan?.Status is 1 or 2)
                 {
                     TempData["Error"] = "No se puede eliminar un préstamo activo.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                var result = await _loanService.DeleteAsync(id);
+                await _loanService.DeleteAsync(id);
             }
             catch (Exception ex)
             {
@@ -224,6 +249,13 @@ namespace SGBL.Web.Controllers
                     return;
                 }
 
+                var email = await GetUserEmailAsync(loanDto.IdUser);
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    _logger.LogWarning("No se envió correo de confirmación porque el usuario {UserId} no tiene email registrado.", loanDto.IdUser);
+                    return;
+                }
+
                 await _emailService.SendAsync(new EmailRequestDto()
                 {
                     To = email,
@@ -233,7 +265,6 @@ namespace SGBL.Web.Controllers
             }
             catch (Exception ex)
             {
-                // Log the error but don't break the flow
                 _logger.LogError(ex, "Error enviando correo de confirmación para el préstamo {LoanId}.", loanDto.Id);
             }
         }
@@ -257,9 +288,16 @@ namespace SGBL.Web.Controllers
                     return;
                 }
 
+                var email = await GetUserEmailAsync(loanDto.IdUser);
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    _logger.LogWarning("No se envió correo de recogida porque el usuario {UserId} no tiene email registrado.", loanDto.IdUser);
+                    return;
+                }
+
                 await _emailService.SendAsync(new EmailRequestDto()
                 {
-                    To = email, // Aquí deberías obtener el email del usuario
+                    To = email,
                     Subject = "Libro Recogido - Biblioteca",
                     HtmlBody = emailBody
                 });
@@ -278,12 +316,14 @@ namespace SGBL.Web.Controllers
                     <h3>Libro Devuelto</h3>
                     <p>El libro ha sido devuelto exitosamente.</p>
                     <p>¡Gracias por usar nuestro servicio de biblioteca!</p>";
+
                 var email = await GetUserEmailAsync(loanDto.IdUser);
                 if (string.IsNullOrWhiteSpace(email))
                 {
                     _logger.LogWarning("No se envió correo de devolución porque el usuario {UserId} no tiene email registrado.", loanDto.IdUser);
                     return;
                 }
+
                 await _emailService.SendAsync(new EmailRequestDto()
                 {
                     To = email,

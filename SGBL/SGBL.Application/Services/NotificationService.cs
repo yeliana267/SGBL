@@ -1,4 +1,10 @@
-﻿using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 using SGBL.Application.Dtos.Email;
 using SGBL.Application.Dtos.Loan;
 using SGBL.Application.Dtos.Notification;
@@ -20,8 +26,13 @@ namespace SGBL.Application.Services
         private readonly IMapper _mapper;
         private readonly IServiceLogs _serviceLogs;
         private readonly IEmailService _emailService;
-        public NotificationService(INotificationRepository notificationRepository, IMapper mapper, IServiceLogs serviceLogs, IEmailService emailService)
-                : base(notificationRepository, mapper, serviceLogs)
+
+        public NotificationService(
+            INotificationRepository notificationRepository,
+            IMapper mapper,
+            IServiceLogs serviceLogs,
+            IEmailService emailService)
+            : base(notificationRepository, mapper, serviceLogs)
         {
             _notificationRepository = notificationRepository;
             _mapper = mapper;
@@ -79,63 +90,6 @@ namespace SGBL.Application.Services
             return await _notificationRepository.MarkAllAsReadAsync(userId, DefaultReadStatus, DefaultUnreadStatus);
         }
 
-        private NotificationDto InitializeBaseNotification(int userId, int typeId, string title, string message)
-        {
-            return new NotificationDto
-            {
-                IdUser = userId,
-                Type = typeId,
-                Title = title,
-                Message = message,
-                Status = DefaultUnreadStatus,
-                ReadDate = null,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-        }
-
-        private async Task<NotificationDto?> CreateNotificationAsync(NotificationDto notificationDto, bool sendEmail, string? email)
-        {
-            try
-            {
-                _serviceLogs.CreateLogInfo($"Creación de notificación para el usuario {notificationDto.IdUser} iniciada.");
-
-                var entity = _mapper.Map<Notification>(notificationDto);
-                entity.Status = DefaultUnreadStatus;
-                entity.ReadDate = null;
-                entity.CreatedAt = DateTime.UtcNow;
-                entity.UpdatedAt = DateTime.UtcNow;
-
-
-                var saved = await _notificationRepository.AddAsync(entity);
-                var result = _mapper.Map<NotificationDto>(saved);
-
-                if (sendEmail && !string.IsNullOrWhiteSpace(email))
-                {
-                    await _emailService.SendAsync(new EmailRequestDto
-                    {
-                        To = email,
-                        Subject = notificationDto.Title,
-                        HtmlBody = BuildEmailBody(notificationDto.Title, notificationDto.Message)
-                    });
-                }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _serviceLogs.CreateLogWarning($"Error al crear notificación: {ex.Message}");
-                throw;
-            }
-        }
-
-        private static string BuildEmailBody(string title, string message)
-        {
-            var safeTitle = WebUtility.HtmlEncode(title);
-            var safeMessage = WebUtility.HtmlEncode(message).Replace("\n", "<br/>");
-
-            return $@"<h2>{safeTitle}</h2><p>{safeMessage}</p><p>Este mensaje ha sido generado automáticamente por el sistema SGBL.</p>";
-        }
         public async Task SendLoanDueReminderAsync(LoanDto loan, string email, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(loan);
@@ -151,7 +105,6 @@ namespace SGBL.Application.Services
             {
                 var subject = $"Recordatorio: el préstamo #{loan.Id} vence el {loan.DueDate:dd/MM/yyyy}";
                 var messageBody = $"Tu préstamo con folio #{loan.Id} vence el {loan.DueDate:dd/MM/yyyy}.";
-
 
                 var emailBody = $@"
                     <p>Hola,</p>
@@ -176,7 +129,7 @@ namespace SGBL.Application.Services
                     Message = messageBody,
                     Status = 1,
                     Type = 1,
-                    ReadDate = DateTime.UtcNow
+                    ReadDate = null
                 };
 
                 await AddAsync(notification);
@@ -189,7 +142,42 @@ namespace SGBL.Application.Services
             }
         }
 
+        public async Task<IReadOnlyList<NotificationDto>> GetRecentByUserAsync(int userId, int take = 5, bool onlyUnread = true)
+        {
+            if (userId <= 0)
+            {
+                return Array.Empty<NotificationDto>();
+            }
 
+            if (take <= 0)
+            {
+                take = 5;
+            }
 
+            try
+            {
+                var query = _notificationRepository
+                    .GetAllQuery()
+                    .AsNoTracking()
+                    .Where(notification => notification.IdUser == userId);
+
+                if (onlyUnread)
+                {
+                    query = query.Where(notification => notification.ReadDate == null);
+                }
+
+                var notifications = await query
+                    .OrderByDescending(notification => notification.CreatedAt)
+                    .Take(take)
+                    .ToListAsync();
+
+                return _mapper.Map<List<NotificationDto>>(notifications);
+            }
+            catch (Exception ex)
+            {
+                _serviceLogs.CreateLogWarning($"Error al obtener las notificaciones del usuario {userId}: {ex}");
+                throw;
+            }
+        }
     }
 }

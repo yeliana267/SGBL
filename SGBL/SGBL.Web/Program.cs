@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using SGBL.Application;
 using SGBL.Persistence;
 using SGBL.Persistence.Context;
+using SGBL.Web.HostedServices;
+using SGBL.Web.Options;
 using System.Security.Claims;
 using SGBL.Web.HostedServices;
 using SGBL.Web.Options;
@@ -70,8 +72,6 @@ namespace SGBL.Web
                     !path.StartsWithSegments("/Admin") &&
                     !path.StartsWithSegments("/UserDashboard") &&
                     !path.StartsWithSegments("/Bibliotecario") &&
-                    !path.StartsWithSegments("/Loan") &&
-                    !path.StartsWithSegments("/Notification") &&
                     !path.StartsWithSegments("/api") &&
                     !path.StartsWithSegments("/dev"))
                 {
