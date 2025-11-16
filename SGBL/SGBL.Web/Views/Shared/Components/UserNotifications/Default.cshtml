@@ -1,0 +1,65 @@
+@using System
+@using System.Linq
+@model SGBL.Web.ViewModels.UserNotificationWidgetViewModel
+@{
+    var widgetId = $"notif-{Guid.NewGuid():N}";
+}
+
+<div class="notification-center" id="@widgetId">
+    <button type="button" class="notification-toggle" aria-label="Notificaciones">
+        <i class="fas fa-bell"></i>
+        @if (Model.UnreadCount > 0)
+        {
+            <span class="notification-badge">@Model.UnreadCount</span>
+        }
+    </button>
+    <div class="notification-panel">
+        <div class="notification-panel-header d-flex justify-content-between align-items-center">
+            <div>
+                <span class="fw-semibold">Notificaciones</span>
+                <small class="text-muted d-block">@((Model.UnreadCount > 0) ? $"{Model.UnreadCount} sin leer" : "Al día")</small>
+            </div>
+        </div>
+        <div class="notification-panel-body">
+            @if (Model.Notifications == null || !Model.Notifications.Any())
+            {
+                <div class="notification-empty text-center text-muted py-3">
+                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                    <p class="mb-0">No tienes notificaciones recientes.</p>
+                </div>
+            }
+            else
+            {
+                foreach (var notification in Model.Notifications)
+                {
+                    <div class="notification-item @(notification.IsRead ? "is-read" : string.Empty)">
+                        <div class="d-flex justify-content-between">
+                            <strong>@notification.Title</strong>
+                            <small>@notification.CreatedAt.ToLocalTime().ToString("dd/MM HH:mm")</small>
+                        </div>
+                        <p class="mb-0 text-muted">@notification.Message</p>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const root = document.getElementById('@widgetId');
+    if (!root) { return; }
+    const toggle = root.querySelector('.notification-toggle');
+    const panel = root.querySelector('.notification-panel');
+    toggle?.addEventListener('click', function (event) {
+        event.preventDefault();
+        panel?.classList.toggle('open');
+    });
+    document.addEventListener('click', function (event) {
+        if (root.contains(event.target)) {
+            return;
+        }
+        panel?.classList.remove('open');
+    });
+})();
+</script>

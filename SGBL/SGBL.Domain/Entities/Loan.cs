@@ -1,6 +1,5 @@
 ﻿
 
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using SGBL.Domain.Base;
@@ -12,7 +11,6 @@ namespace SGBL.Domain.Entities
     {
         [Key]
         [Column("idprestamo")]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public override int Id { get; set; }
 
         [Column("id_libro")]
@@ -40,10 +38,10 @@ namespace SGBL.Domain.Entities
         public DateTime PickupDeadline { get; set; }
 
         [Column("estado")]
-        public int? Status { get; set; }
+        public int Status { get; set; }
 
         [Column("monto_multa")]
-        public decimal? FineAmount { get; set; }
+        public decimal FineAmount { get; set; }
 
         [Column("notas")]
         public string? Notes { get; set; }

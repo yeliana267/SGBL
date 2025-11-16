@@ -12,9 +12,9 @@ namespace SGBL.Application.Dtos.Loan
         public DateTime? ReturnDate { get; set; }
         public DateTime? PickupDate { get; set; }
         public DateTime PickupDeadline { get; set; }
-        public int? Status { get; set; }
-        public decimal? FineAmount { get; set; }
-        public string? Notes { get; set; }
+        public int Status { get; set; }
+        public decimal FineAmount { get; set; }
+        public string Notes { get; set; } = string.Empty;
     }
 }
 
