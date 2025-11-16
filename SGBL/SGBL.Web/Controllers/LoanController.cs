@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using AutoMapper;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SGBL.Application.Dtos.Email;
 using SGBL.Application.Dtos.Loan;
 using SGBL.Application.Interfaces;
 using SGBL.Application.ViewModels;
+using System;
+using System.Collections.Generic;
 
 namespace SGBL.Web.Controllers
 {
+    [Authorize(Roles = "9")]
     public class LoanController : Controller
     {
         private readonly ILoanService _loanService;
