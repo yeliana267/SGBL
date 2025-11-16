@@ -1,7 +1,6 @@
-﻿using System.ComponentModel.Design;
-using Application.Interfaces.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using SGBL.Application.Dtos.Email;
 using SGBL.Application.Dtos.Loan;
 using SGBL.Application.Interfaces;
@@ -15,15 +14,19 @@ namespace SGBL.Web.Controllers
         private readonly ILoanStatusService _loanStatusService;
         private readonly IBookService _bookService;
         private readonly IEmailService _emailService;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ILogger<LoanController> _logger;
 
-        public LoanController(ILoanService loanService, ILoanStatusService loanStatusService, IBookService bookService, IEmailService emailService, IMapper mapper)
+        public LoanController(ILoanService loanService, ILoanStatusService loanStatusService, IBookService bookService, IEmailService emailService, IUserService userService, IMapper mapper, ILogger<LoanController> logger)
         {
             _loanService = loanService;
             _loanStatusService = loanStatusService;
             _bookService = bookService;
             _emailService = emailService;
+            _userService = userService;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -202,17 +205,23 @@ namespace SGBL.Web.Controllers
                     </ul>
                     <p>Si no recoge el libro en el plazo establecido, el préstamo será cancelado automáticamente.</p>";
 
+                var email = await GetUserEmailAsync(loanDto.IdUser);
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    _logger.LogWarning("No se envió correo de confirmación porque el usuario {UserId} no tiene email registrado.", loanDto.IdUser);
+                    return;
+                }
+
                 await _emailService.SendAsync(new EmailRequestDto()
                 {
-                    To = "user@email.com", // Aquí deberías obtener el email del usuario
+                    To = email,
                     Subject = "Confirmación de Préstamo - Biblioteca",
                     HtmlBody = emailBody
                 });
             }
             catch (Exception ex)
             {
-                // Log the error but don't break the flow
-                Console.WriteLine($"Error sending email: {ex.Message}");
+                _logger.LogError(ex, "Error enviando correo de confirmación para el préstamo {LoanId}.", loanDto.Id);
             }
         }
 
@@ -229,16 +238,23 @@ namespace SGBL.Web.Controllers
                         <li>Recuerde devolver el libro a tiempo para evitar multas</li>
                     </ul>";
 
+                var email = await GetUserEmailAsync(loanDto.IdUser);
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    _logger.LogWarning("No se envió correo de recogida porque el usuario {UserId} no tiene email registrado.", loanDto.IdUser);
+                    return;
+                }
+
                 await _emailService.SendAsync(new EmailRequestDto()
                 {
-                    To = "user@email.com", // Aquí deberías obtener el email del usuario
+                    To = email,
                     Subject = "Libro Recogido - Biblioteca",
                     HtmlBody = emailBody
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending pickup notification: {ex.Message}");
+                _logger.LogError(ex, "Error enviando correo de recogida para el préstamo {LoanId}.", loanDto.Id);
             }
         }
 
@@ -251,16 +267,37 @@ namespace SGBL.Web.Controllers
                     <p>El libro ha sido devuelto exitosamente.</p>
                     <p>¡Gracias por usar nuestro servicio de biblioteca!</p>";
 
+                var email = await GetUserEmailAsync(loanDto.IdUser);
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    _logger.LogWarning("No se envió correo de devolución porque el usuario {UserId} no tiene email registrado.", loanDto.IdUser);
+                    return;
+                }
+
                 await _emailService.SendAsync(new EmailRequestDto()
                 {
-                    To = "user@email.com", // Aquí deberías obtener el email del usuario
+                    To = email,
                     Subject = "Libro Devuelto - Biblioteca",
                     HtmlBody = emailBody
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending return notification: {ex.Message}");
+                _logger.LogError(ex, "Error enviando correo de devolución para el préstamo {LoanId}.", loanDto.Id);
+            }
+        }
+
+        private async Task<string?> GetUserEmailAsync(int userId)
+        {
+            try
+            {
+                var user = await _userService.GetById(userId);
+                return user?.Email;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "No se pudo obtener el correo electrónico del usuario {UserId}.", userId);
+                return null;
             }
         }
 

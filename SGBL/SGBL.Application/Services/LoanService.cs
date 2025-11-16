@@ -1,7 +1,9 @@
 ﻿
+using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using SGBL.Application.Dtos.Book;
 using SGBL.Application.Dtos.Loan;
 using SGBL.Application.Interfaces;
 using SGBL.Domain.Entities;
@@ -21,9 +23,33 @@ namespace SGBL.Application.Services
             _serviceLogs = serviceLogs;
         }
 
-        public async Task GetLoansDueInDays(int day)
+        public async Task<List<LoanDto>> GetLoansDueInDays(int day)
         {
+            if (day < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(day), "El número de días debe ser mayor o igual a cero.");
+            }
 
+            try
+            {
+                var today = DateTime.UtcNow.Date;
+                var limitExclusive = today.AddDays(day + 1);
+
+                var query = _loanRepository.GetAllQuery();
+
+                var loans = await query
+                    .Where(loan => loan.ReturnDate == null &&
+                                   loan.DueDate >= today &&
+                                   loan.DueDate < limitExclusive)
+                    .ToListAsync();
+
+                return _mapper.Map<List<LoanDto>>(loans);
+            }
+            catch (Exception ex)
+            {
+                _serviceLogs.CreateLogWarning($"Error al obtener préstamos por vencer en {day} días: {ex}");
+                throw;
+            }
         }
 
         public async Task IncreaseAvailableCopies(int bookId)

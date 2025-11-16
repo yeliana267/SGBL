@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using SGBL.Application;
 using SGBL.Persistence;
 using SGBL.Persistence.Context;
+using SGBL.Web.HostedServices;
+using SGBL.Web.Options;
 using System.Security.Claims;
 
 namespace SGBL.Web
@@ -49,6 +51,8 @@ namespace SGBL.Web
             builder.Services.AddPersistenceLayerIoc(builder.Configuration);
             builder.Services.AddApplicationLayerIoc();
             builder.Services.AddInfraestructureLayerIoc(builder.Configuration);
+            builder.Services.Configure<LoanReminderOptions>(builder.Configuration.GetSection("LoanDueReminder"));
+            builder.Services.AddHostedService<LoanDueReminderHostedService>();
 
             //  OUTPUT CACHE
             builder.Services.AddOutputCache();
