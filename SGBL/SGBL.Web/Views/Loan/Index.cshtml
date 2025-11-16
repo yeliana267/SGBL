@@ -76,7 +76,7 @@
                                     <td>@loan.Id</td>
                                     <td>@loan.IdBook</td>
                                     <td>@loan.IdUser</td>
-                                    <td>@loan.DateLoan.ToString("dd/MM/yyyy")</td>
+                                    <td>@(loan.DateLoan?.ToString("dd/MM/yyyy") ?? "-")</td>
                                     <td>@loan.DueDate.ToString("dd/MM/yyyy")</td>
                                     <td>
                                         @GetStatusBadge(loan.Status)

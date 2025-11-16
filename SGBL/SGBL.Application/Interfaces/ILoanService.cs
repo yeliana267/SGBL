@@ -7,5 +7,6 @@ namespace SGBL.Application.Interfaces
     public interface ILoanService : IGenericService<LoanDto>
     {
         Task<List<LoanDto>> GetLoansDueInDays(int day);
+        Task<bool> UserHasActiveLoanAsync(int userId, int bookId);
     }
 }

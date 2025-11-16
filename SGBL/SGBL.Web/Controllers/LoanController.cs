@@ -51,22 +51,24 @@ namespace SGBL.Web.Controllers
                 Id = 0,
                 IdBook = 0,
                 IdUser = 0,
-                IdLibrarian = 0,
-                DateLoan = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(7),
+                IdLibrarian = null,
+                DateLoan = DateTime.UtcNow,
+                DueDate = DateTime.UtcNow.AddDays(7),
                 ReturnDate = null,
                 PickupDate = null,
-                PickupDeadline = DateTime.Now.AddDays(1), // 24 horas para recoger
+                PickupDeadline = DateTime.UtcNow.AddDays(1), // 24 horas para recoger
                 Status = 1, // 1 = Pending (asumiendo que 1 es el estado "Pendiente")
                 FineAmount = 0,
                 Notes = string.Empty,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
             });
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(LoanViewModel model)
         {
+            model.Notes ??= string.Empty;
+
             if (ModelState.IsValid)
             {
                 try
@@ -80,15 +82,15 @@ namespace SGBL.Web.Controllers
                     }
 
                     // Configurar fechas y estado
-                    model.PickupDeadline = DateTime.Now.AddDays(1); // 24 horas para recoger
+                    model.PickupDeadline = DateTime.UtcNow.AddDays(1); // 24 horas para recoger
                     model.Status = 1; // Estado: Pendiente
-                    model.DateLoan = DateTime.Now;
-                    model.DueDate = DateTime.Now.AddDays(7); // 7 días para devolver
+                    model.DateLoan = DateTime.UtcNow;
+                    model.DueDate = DateTime.UtcNow.AddDays(7); // 7 días para devolver
 
                     var loanDto = _mapper.Map<LoanDto>(model);
                     var result = await _loanService.AddAsync(loanDto);
 
-                    if (result.Status == 1)
+                    if (result?.Status == 1)
                     {
                         // Disminuir la cantidad disponible del libro
                         await _bookService.DecreaseAvailableCopies(model.IdBook);
@@ -172,14 +174,13 @@ namespace SGBL.Web.Controllers
             {
                 var loan = await _loanService.GetById(id);
 
-                // Verificar si el préstamo está activo (no se puede eliminar)
-                if (loan.Status == 1 || loan.Status == 2) // 1 = Pendiente, 2 = Recogido
+                if (loan?.Status is 1 or 2)
                 {
                     TempData["Error"] = "No se puede eliminar un préstamo activo.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                var result = await _loanService.DeleteAsync(id);
+                await _loanService.DeleteAsync(id);
             }
             catch (Exception ex)
             {

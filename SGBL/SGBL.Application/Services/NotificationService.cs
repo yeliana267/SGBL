@@ -1,7 +1,9 @@
-﻿
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using SGBL.Application.Dtos.Email;
 using SGBL.Application.Dtos.Loan;
@@ -14,12 +16,20 @@ namespace SGBL.Application.Services
 {
     public class NotificationService : GenericService<Notification, NotificationDto>, INotificationService
     {
+        private readonly INotificationRepository _notificationRepository;
+        private readonly IMapper _mapper;
         private readonly IServiceLogs _serviceLogs;
         private readonly IEmailService _emailService;
 
-
-        public NotificationService(INotificationRepository notificationRepository, IMapper mapper, IServiceLogs serviceLogs, IEmailService emailService) : base(notificationRepository, mapper, serviceLogs)
+        public NotificationService(
+            INotificationRepository notificationRepository,
+            IMapper mapper,
+            IServiceLogs serviceLogs,
+            IEmailService emailService)
+            : base(notificationRepository, mapper, serviceLogs)
         {
+            _notificationRepository = notificationRepository;
+            _mapper = mapper;
             _serviceLogs = serviceLogs;
             _emailService = emailService;
         }
@@ -63,7 +73,7 @@ namespace SGBL.Application.Services
                     Message = messageBody,
                     Status = 1,
                     Type = 1,
-                    ReadDate = DateTime.UtcNow
+                    ReadDate = null
                 };
 
                 await AddAsync(notification);
@@ -72,6 +82,44 @@ namespace SGBL.Application.Services
             catch (Exception ex)
             {
                 _serviceLogs.CreateLogWarning($"Error enviando recordatorio para el préstamo {loan.Id}: {ex}");
+                throw;
+            }
+        }
+
+        public async Task<IReadOnlyList<NotificationDto>> GetRecentByUserAsync(int userId, int take = 5, bool onlyUnread = true)
+        {
+            if (userId <= 0)
+            {
+                return Array.Empty<NotificationDto>();
+            }
+
+            if (take <= 0)
+            {
+                take = 5;
+            }
+
+            try
+            {
+                var query = _notificationRepository
+                    .GetAllQuery()
+                    .AsNoTracking()
+                    .Where(notification => notification.IdUser == userId);
+
+                if (onlyUnread)
+                {
+                    query = query.Where(notification => notification.ReadDate == null);
+                }
+
+                var notifications = await query
+                    .OrderByDescending(notification => notification.CreatedAt)
+                    .Take(take)
+                    .ToListAsync();
+
+                return _mapper.Map<List<NotificationDto>>(notifications);
+            }
+            catch (Exception ex)
+            {
+                _serviceLogs.CreateLogWarning($"Error al obtener las notificaciones del usuario {userId}: {ex}");
                 throw;
             }
         }

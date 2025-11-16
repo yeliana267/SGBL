@@ -1,4 +1,3 @@
-﻿
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +15,9 @@ namespace SGBL.Application.Services
         private readonly ILoanRepository _loanRepository;
         private readonly IMapper _mapper;
         private readonly IServiceLogs _serviceLogs;
-        public LoanService(ILoanRepository loanRepository, IMapper mapper, IServiceLogs serviceLogs) : base(loanRepository, mapper, serviceLogs)
+
+        public LoanService(ILoanRepository loanRepository, IMapper mapper, IServiceLogs serviceLogs)
+            : base(loanRepository, mapper, serviceLogs)
         {
             _loanRepository = loanRepository;
             _mapper = mapper;
@@ -52,14 +53,32 @@ namespace SGBL.Application.Services
             }
         }
 
-        public async Task IncreaseAvailableCopies(int bookId)
+        public async Task<bool> UserHasActiveLoanAsync(int userId, int bookId)
         {
+            if (userId <= 0 || bookId <= 0)
+            {
+                return false;
+            }
 
+            try
+            {
+                var activeStatuses = new[] { 1, 2 };
+
+                var query = _loanRepository
+                    .GetAllQuery()
+                    .AsNoTracking();
+
+                return await query.AnyAsync(loan =>
+                    loan.IdUser == userId &&
+                    loan.IdBook == bookId &&
+                    loan.ReturnDate == null &&
+                    activeStatuses.Contains(loan.Status));
+            }
+            catch (Exception ex)
+            {
+                _serviceLogs.CreateLogWarning($"Error verificando préstamos activos del usuario {userId} para el libro {bookId}: {ex}");
+                throw;
+            }
         }
-
-
-
-
-
     }
 }

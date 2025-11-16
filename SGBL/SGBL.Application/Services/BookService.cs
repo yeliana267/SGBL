@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AutoMapper;
 using SGBL.Application.Dtos.Author;
 using SGBL.Application.Dtos.Book;
@@ -117,12 +118,31 @@ namespace SGBL.Application.Services
 
         public async Task DecreaseAvailableCopies(int bookId)
         {
-            throw new NotImplementedException();
+            var book = await _bookRepository.GetById(bookId)
+                ?? throw new KeyNotFoundException($"El libro con ID {bookId} no existe.");
+
+            if (book.AvailableCopies <= 0)
+            {
+                throw new InvalidOperationException($"No hay copias disponibles del libro '{book.Title}'.");
+            }
+
+            book.AvailableCopies -= 1;
+            book.UpdatedAt = DateTime.UtcNow;
+
+            await _bookRepository.UpdateAsync(bookId, book);
         }
 
         public async Task IncreaseAvailableCopies(int bookId)
         {
-            throw new NotImplementedException();
+            var book = await _bookRepository.GetById(bookId)
+                ?? throw new KeyNotFoundException($"El libro con ID {bookId} no existe.");
+
+            if (book.AvailableCopies < book.TotalCopies)
+            {
+                book.AvailableCopies += 1;
+                book.UpdatedAt = DateTime.UtcNow;
+                await _bookRepository.UpdateAsync(bookId, book);
+            }
         }
         public async Task<PagedResultDto> SearchBooksPagedAsync(
     string? title,
