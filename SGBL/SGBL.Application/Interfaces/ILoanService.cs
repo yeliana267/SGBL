@@ -9,4 +9,5 @@ namespace SGBL.Application.Interfaces
         Task<List<LoanDto>> GetLoansDueInDays(int day);
         Task<bool> UserHasActiveLoanAsync(int userId, int bookId);
     }
+
 }

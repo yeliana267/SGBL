@@ -1,4 +1,5 @@
-﻿
+using System;
+
 namespace SGBL.Application.ViewModels
 {
     public class LoanViewModel : BaseViewModel<int>
@@ -16,3 +17,4 @@ namespace SGBL.Application.ViewModels
         public string Notes { get; set; } = string.Empty;
     }
 }
+

@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using SGBL.Domain.Entities;
 
 namespace SGBL.Domain.Interfaces
@@ -11,5 +12,6 @@ namespace SGBL.Domain.Interfaces
     int? authorId,
     int pageNumber,
     int pageSize);
+        Task<Book?> AdjustAvailableCopiesAsync(int bookId, int delta);
     }
 }

@@ -31,6 +31,7 @@ namespace SGBL.Application.Profiles
             CreateMap<UserStatus, UserStatusDto>().ApplyStandardMapping();
             CreateMap<BookStatus, BookStatusDto>().ApplyStandardMapping();
             CreateMap<ReminderStatus, ReminderStatusDto>().ApplyStandardMapping();
+            CreateMap<Notification, NotificationDto>().ApplyStandardMapping();
             CreateMap<NotificationStatus, NotificationStatusDto>().ApplyStandardMapping();
             CreateMap<NotificationType, NotificationTypeDto>().ApplyStandardMapping();
             CreateMap<Genre, GenreDto>().ApplyStandardMapping();
@@ -41,9 +42,7 @@ namespace SGBL.Application.Profiles
            
 
        
-            
-
-
+         
             CreateMap<Book, BookDto>()
                 .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
                 .ForMember(d => d.Isbn, o => o.MapFrom(s => s.Isbn))   
@@ -61,6 +60,7 @@ namespace SGBL.Application.Profiles
             CreateMap<UserStatusDto, UserStatus>().ApplyStandardReverseMapping();
             CreateMap<BookStatusDto, BookStatus>().ApplyStandardReverseMapping();
             CreateMap<ReminderStatusDto, ReminderStatus>().ApplyStandardReverseMapping();
+            CreateMap<NotificationDto, Notification>().ApplyStandardReverseMapping();
             CreateMap<NotificationStatusDto, NotificationStatus>().ApplyStandardReverseMapping();
             CreateMap<NotificationTypeDto, NotificationType>().ApplyStandardReverseMapping();
             CreateMap<GenreDto, Genre>().ApplyStandardReverseMapping();
@@ -100,6 +100,12 @@ namespace SGBL.Application.Profiles
             CreateMap<UserDto, User>()
                 .ApplyStandardReverseMapping()
                 .IgnoreSensitiveProperties();
+
+            CreateMap<NotificationDto, NotificationViewModel>()
+                .ApplyStandardMapping();
+
+            CreateMap<NotificationViewModel, NotificationDto>()
+                .ApplyStandardReverseMapping();
         }
     }
 

@@ -6,6 +6,8 @@ using SGBL.Persistence.Context;
 using SGBL.Web.HostedServices;
 using SGBL.Web.Options;
 using System.Security.Claims;
+using SGBL.Web.HostedServices;
+using SGBL.Web.Options;
 
 namespace SGBL.Web
 {

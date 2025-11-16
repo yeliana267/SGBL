@@ -7,6 +7,10 @@ using SGBL.Application.Dtos.Loan;
 using SGBL.Application.Interfaces;
 using SGBL.Domain.Entities;
 using SGBL.Domain.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SGBL.Application.Services
 {
@@ -14,12 +18,14 @@ namespace SGBL.Application.Services
     {
         private readonly ILoanRepository _loanRepository;
         private readonly IMapper _mapper;
+        private readonly IBookRepository _bookRepository;
         private readonly IServiceLogs _serviceLogs;
 
         public LoanService(ILoanRepository loanRepository, IMapper mapper, IServiceLogs serviceLogs)
             : base(loanRepository, mapper, serviceLogs)
         {
             _loanRepository = loanRepository;
+            _bookRepository = bookRepository;
             _mapper = mapper;
             _serviceLogs = serviceLogs;
         }

@@ -1,0 +1,60 @@
+﻿@model SGBL.Application.ViewModels.NotificationViewModel
+@{
+    ViewData["Title"] = "Detalle de notificación";
+}
+
+<h2 class="mt-3">Detalle de notificación</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Título</dt>
+            <dd class="col-sm-9">@Model.Title</dd>
+
+            <dt class="col-sm-3">Mensaje</dt>
+            <dd class="col-sm-9">@Model.Message</dd>
+
+            <dt class="col-sm-3">Usuario</dt>
+            <dd class="col-sm-9">@Model.IdUser</dd>
+
+            <dt class="col-sm-3">Tipo</dt>
+            <dd class="col-sm-9">@Model.Type</dd>
+
+            <dt class="col-sm-3">Estado</dt>
+            <dd class="col-sm-9">@Model.StatusDescription</dd>
+
+            <dt class="col-sm-3">Libro</dt>
+            <dd class="col-sm-9">@(Model.IdBook.HasValue ? Model.IdBook.Value.ToString() : "-")</dd>
+
+            <dt class="col-sm-3">Préstamo</dt>
+            <dd class="col-sm-9">@(Model.IdLoan.HasValue ? Model.IdLoan.Value.ToString() : "-")</dd>
+
+            <dt class="col-sm-3">Creada</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+
+            <dt class="col-sm-3">Leída</dt>
+            <dd class="col-sm-9">
+                @if (Model.ReadDate.HasValue)
+                {
+                    @Model.ReadDate.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">Pendiente</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" class="btn btn-secondary me-2">Volver</a>
+    @if (!Model.IsRead)
+    {
+        <form asp-action="MarkAsRead" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-success">Marcar como leída</button>
+        </form>
+    }
+</div>

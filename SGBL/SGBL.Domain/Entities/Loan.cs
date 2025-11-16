@@ -47,3 +47,4 @@ namespace SGBL.Domain.Entities
         public string? Notes { get; set; }
     }
 }
+

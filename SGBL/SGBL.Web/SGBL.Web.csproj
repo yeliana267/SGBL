@@ -30,8 +30,6 @@
     <Folder Include="Views\Bibliotecario\BookManagement\" />
     <Folder Include="Views\Bibliotecario\Returns\" />
     <Folder Include="Views\Shared\Components\" />
-    <Folder Include="Views\UserDashboard\Books\" />
-    <Folder Include="Views\UserDashboard\MyLoans\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -11,11 +11,17 @@ using SGBL.Application.Dtos.Notification;
 using SGBL.Application.Interfaces;
 using SGBL.Domain.Entities;
 using SGBL.Domain.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace SGBL.Application.Services
 {
     public class NotificationService : GenericService<Notification, NotificationDto>, INotificationService
     {
+        private const int DefaultUnreadStatus = 1;
+        private const int DefaultReadStatus = 2;
         private readonly INotificationRepository _notificationRepository;
         private readonly IMapper _mapper;
         private readonly IServiceLogs _serviceLogs;
@@ -32,6 +38,56 @@ namespace SGBL.Application.Services
             _mapper = mapper;
             _serviceLogs = serviceLogs;
             _emailService = emailService;
+        }
+        public async Task<NotificationDto?> CreateLoanNotificationAsync(int userId, int loanId, int typeId, string title, string message, bool sendEmail = false, string? email = null)
+        {
+            var notification = InitializeBaseNotification(userId, typeId, title, message);
+            notification.IdLoan = loanId;
+            notification.IdBook = null;
+            return await CreateNotificationAsync(notification, sendEmail, email);
+        }
+
+        public async Task<NotificationDto?> CreateBookNotificationAsync(int userId, int bookId, int typeId, string title, string message, bool sendEmail = false, string? email = null)
+        {
+            var notification = InitializeBaseNotification(userId, typeId, title, message);
+            notification.IdBook = bookId;
+            notification.IdLoan = null;
+            return await CreateNotificationAsync(notification, sendEmail, email);
+        }
+
+        public async Task<NotificationDto?> CreateUserNotificationAsync(int userId, int typeId, string title, string message, bool sendEmail = false, string? email = null)
+        {
+            var notification = InitializeBaseNotification(userId, typeId, title, message);
+            notification.IdBook = null;
+            notification.IdLoan = null;
+            return await CreateNotificationAsync(notification, sendEmail, email);
+        }
+
+        public async Task<List<NotificationDto>> GetByUserAsync(int userId)
+        {
+            var notifications = await _notificationRepository.GetByUserAsync(userId);
+            return _mapper.Map<List<NotificationDto>>(notifications);
+        }
+
+        public async Task<List<NotificationDto>> GetUnreadByUserAsync(int userId)
+        {
+            var notifications = await _notificationRepository.GetUnreadByUserAsync(userId, DefaultUnreadStatus);
+            return _mapper.Map<List<NotificationDto>>(notifications);
+        }
+
+        public async Task<int> CountUnreadByUserAsync(int userId)
+        {
+            return await _notificationRepository.CountUnreadByUserAsync(userId, DefaultUnreadStatus);
+        }
+
+        public async Task<bool> MarkAsReadAsync(int notificationId)
+        {
+            return await _notificationRepository.MarkAsReadAsync(notificationId, DefaultReadStatus);
+        }
+
+        public async Task<int> MarkAllAsReadAsync(int userId)
+        {
+            return await _notificationRepository.MarkAllAsReadAsync(userId, DefaultReadStatus, DefaultUnreadStatus);
         }
 
         public async Task SendLoanDueReminderAsync(LoanDto loan, string email, CancellationToken cancellationToken = default)

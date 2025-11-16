@@ -16,6 +16,7 @@ namespace SGBL.Application.Tests.Services
         private readonly Mock<IMapper> _mockMapper;
         private readonly Mock<IServiceLogs> _mockServiceLogs;
         private readonly Mock<IBookAuthorRepository> _mockBookAuthorRepository;
+        private readonly Mock<IBookGenreRepository> _mockBookGenreRepository;
         private readonly BookService _bookService;
 
         public BookServiceTests()
@@ -24,12 +25,14 @@ namespace SGBL.Application.Tests.Services
             _mockMapper = new Mock<IMapper>();
             _mockServiceLogs = new Mock<IServiceLogs>();
             _mockBookAuthorRepository = new Mock<IBookAuthorRepository>(); // ⭐ NUEVO MOCK
+            _mockBookGenreRepository = new Mock<IBookGenreRepository>();
 
             _bookService = new BookService(
                 _mockBookRepository.Object,
                 _mockMapper.Object,
                 _mockServiceLogs.Object,
-                _mockBookAuthorRepository.Object // ⭐ AGREGAR ESTE PARÁMETRO
+                _mockBookAuthorRepository.Object,
+                _mockBookGenreRepository.Object
             );
         }
 

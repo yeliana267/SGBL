@@ -1,4 +1,5 @@
-﻿
+using System;
+
 namespace SGBL.Application.Dtos.Loan
 {
     public class LoanDto : BaseAuditableDto<int>
@@ -16,3 +17,4 @@ namespace SGBL.Application.Dtos.Loan
         public string Notes { get; set; } = string.Empty;
     }
 }
+
