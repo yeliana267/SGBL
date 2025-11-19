@@ -1,36 +1,124 @@
 ﻿@model SGBL.Application.ViewModels.LoanViewModel
+
 @{
     ViewData["Title"] = "Editar Préstamo";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var books = ViewBag.AvailableBooks as List<SGBL.Application.ViewModels.BookViewModel>
+                ?? new List<SGBL.Application.ViewModels.BookViewModel>();
+    var users = ViewBag.AvailableUsers as List<SGBL.Application.ViewModels.UserViewModel>
+                ?? new List<SGBL.Application.ViewModels.UserViewModel>();
 }
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
-        <a href="@Url.Action("Index")" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Volver a la lista
-        </a>
-    </div>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">@ViewData["Title"]</h4>
+            </div>
+            <div class="card-body">
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Editar Información del Préstamo</h6>
-        </div>
-        <div class="card-body">
-            <form method="post" asp-action="Edit">
-                @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="Id" />
+                @* Muestra los errores de validación generales *@
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
 
-                <partial name="_LoanForm" model="Model" />
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
 
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Actualizar Préstamo
-                        </button>
-                        <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
-                    </div>
-                </div>
-            </form>
+                    <div class="row">
+                        <!-- LIBRO -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="IdBook" class="form-label">Libro *</label>
+                                <select asp-for="IdBook" class="form-select">
+                                    <option value="">Seleccione un libro</option>
+                                    @foreach (var book in books)
+                                    {
+                                        <option value="@book.Id">@book.Title</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="IdBook" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- USUARIO -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="IdUser" class="form-label">Usuario *</label>
+
+                                @if (User.IsInRole("8") || User.IsInRole("7"))  // Bibliotecario / Admin
+                                {
+                                    <select asp-for="IdUser" class="form-select" required>
+                                        <option value="">Seleccione un usuario</option>
+                                        @foreach (var user in ViewBag.AvailableUsers)
+                                        {
+                                            if (user.Id == Model.IdUser)
+                                            {
+                                                <option value="@user.Id" selected="selected">@user.Name</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@user.Id">@user.Name</option>
+                                            }
+                                        }
+                                    </select>
+                                }
+                                else  // Usuario normal
+                                {
+                                    <input type="hidden" asp-for="IdUser" />
+                                    <p class="form-control-plaintext">
+                                        <strong>@ViewBag.CurrentUserName</strong>
+                                    </p>
+                                }
+
+                                <span asp-validation-for="IdUser" class="text-danger"></span>
+                            </div>
+                        </div>
+
+
+
+                        <div class="row">
+                            <!-- FECHA LÍMITE DE RETIRO -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="PickupDeadline" class="form-label">Fecha Límite de Retiro *</label>
+                                    <input asp-for="PickupDeadline" type="date" class="form-control" />
+                                    <small class="form-text text-muted">
+                                        Fecha máxima para que el usuario retire el libro
+                                    </small>
+                                    <span asp-validation-for="PickupDeadline" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- FECHA DE DEVOLUCIÓN -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="DueDate" class="form-label">Fecha de Devolución *</label>
+                                    <input asp-for="DueDate" type="date" class="form-control" />
+                                    <small class="form-text text-muted">
+                                        Fecha en que debe devolver el libro
+                                    </small>
+                                    <span asp-validation-for="DueDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NOTAS -->
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">Notas</label>
+                            <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Actualizar Préstamo</button>
+                        </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

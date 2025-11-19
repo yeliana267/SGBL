@@ -11,5 +11,8 @@ namespace SGBL.Domain.Interfaces
     int? authorId,
     int pageNumber,
     int pageSize);
+        Task<IEnumerable<Book>> GetAvailableBooksAsync();
+
     }
+
 }

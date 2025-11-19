@@ -7,7 +7,7 @@ using SGBL.Application.ViewModels;
 
 namespace SGBL.Web.Controllers
 {
-    [Authorize(Roles = "7")]
+    [Authorize(Roles = "7,8")]
     public class BookController : Controller
     {
         private readonly IBookService _bookService;

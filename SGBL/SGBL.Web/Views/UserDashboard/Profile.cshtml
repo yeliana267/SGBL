@@ -1,5 +1,80 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Mi Perfil";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var name = ViewData["UserName"] as string ?? "Usuario";
+    var email = ViewData["UserEmail"] as string ?? "";
+    var role = ViewData["UserRole"] as string ?? "Usuario";
+
+    int activeLoans = ViewBag.ActiveLoans ?? 0;
+    int returnedLoans = ViewBag.ReturnedLoans ?? 0;
 }
+
+<div class="container mt-4">
+
+    <div class="row">
+        <!-- Tarjeta con datos del usuario -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-user-circle fa-5x text-secondary mb-3"></i>
+
+                    <h4 class="fw-bold">@name</h4>
+                    <p class="text-muted mb-1">@email</p>
+                    <span class="badge bg-primary">@role</span>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-primary text-white">
+                    <strong>Mis estadísticas</strong>
+                </div>
+                <div class="card-body">
+                    <p><strong>Préstamos activos:</strong> @activeLoans</p>
+                    <p><strong>Libros devueltos:</strong> @returnedLoans</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones / info extra -->
+        <div class="col-md-8 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Información de la cuenta</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Desde aquí puedes ver tus datos básicos y acceder rápido a tus
+                        préstamos y a la búsqueda de libros.
+                    </p>
+
+                    <hr />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Nombre</h6>
+                            <p class="mb-0">@name</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Correo</h6>
+                            <p class="mb-0">@email</p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="@Url.Action("Index", "Loan")" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-1"></i> Ver mis préstamos
+                        </a>
+                        <a href="@Url.Action("Books", "UserDashboard")" class="btn btn-outline-success">
+                            <i class="fas fa-book me-1"></i> Buscar libros
+                        </a>
+                        @* Si luego quieres permitir cambiar contraseña, aquí pones otro botón *@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

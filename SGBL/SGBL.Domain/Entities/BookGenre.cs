@@ -1,6 +1,4 @@
-﻿
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using SGBL.Domain.Base;
 
@@ -16,7 +14,6 @@ namespace SGBL.Domain.Entities
         public int IdBook { get; set; }
         [Column("id_genero")]
         public int IdGenre { get; set; }
-
 
         [ForeignKey("IdBook")]
         public virtual Book Book { get; set; }

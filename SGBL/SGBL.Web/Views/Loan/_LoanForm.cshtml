@@ -1,0 +1,69 @@
+﻿@model SGBL.Application.ViewModels.LoanViewModel
+<div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label asp-for="IdBook" class="form-label">Libro *</label>
+            <select asp-for="IdBook" class="form-select" required>
+                <option value="">Seleccione un libro</option>
+                @if (ViewBag.AvailableBooks != null)
+                {
+                    foreach (var book in ViewBag.AvailableBooks)
+                    {
+                        <option value="@book.Id">@book.Title</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="IdBook" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label asp-for="IdUser" class="form-label">Usuario *</label>
+
+            @if (User.IsInRole("8") || User.IsInRole("7"))  // Bibliotecario o Admin
+            {
+                <select asp-for="IdUser" class="form-select" required>
+                    <option value="">Seleccione un usuario</option>
+                    @foreach (var user in ViewBag.AvailableUsers)
+                    {
+                        <option value="@user.Id">@user.Name</option>
+                    }
+                </select>
+            }
+            else  // Usuario normal (rol 9)
+            {
+                <input type="hidden" asp-for="IdUser" value="@ViewBag.CurrentUserId" />
+                <p><strong>Usuario:</strong> @ViewBag.CurrentUserName</p>
+            }
+
+            <span asp-validation-for="IdUser" class="text-danger"></span>
+        </div>
+    </div>
+
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label asp-for="PickupDeadline" class="form-label">Fecha Límite de Retiro *</label>
+            <input asp-for="PickupDeadline" type="date" class="form-control" required />
+            <span asp-validation-for="PickupDeadline" class="text-danger"></span>
+            <small class="form-text text-muted">Fecha máxima para que el usuario retire el libro</small>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label asp-for="DueDate" class="form-label">Fecha de Devolución *</label>
+            <input asp-for="DueDate" type="date" class="form-control" required />
+            <span asp-validation-for="DueDate" class="text-danger"></span>
+            <small class="form-text text-muted">Fecha en que debe devolver el libro</small>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Notes" class="form-label">Notas</label>
+    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+    <span asp-validation-for="Notes" class="text-danger"></span>
+</div>

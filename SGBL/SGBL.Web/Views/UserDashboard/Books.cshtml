@@ -1,4 +1,4 @@
-﻿@model SGBL.Application.ViewModels.PagedResultViewModel
+﻿@model SGBL.Application.ViewModels.PagedResultViewModel<SGBL.Application.ViewModels.BookViewModel>
 
 @{
     ViewData["Title"] = "Búsqueda de libros";
@@ -256,6 +256,23 @@ else if (action == "showbook")
                 <button class="btn btn-warning btn-sm">
                     <i class="fas fa-bell me-2"></i>Recordarme
                 </button>
+                        @if (book.AvailableCopies > 0 && book.StatusId == 12)
+                        {
+                            <form asp-controller="Loan"
+                                  asp-action="Create"
+                                  method="get" class="d-inline">
+                                <input type="hidden" name="bookId" value="@book.Id" />
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-bookmark me-2"></i>Tomar en préstamo
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary btn-sm" type="button" disabled>
+                                No disponible
+                            </button>
+                        }
             </div>
         </div>
     </div>
@@ -268,8 +285,3 @@ else if (action == "showbook")
 </div>
     }
 }
-
-
-
-
-

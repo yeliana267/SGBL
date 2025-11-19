@@ -1,4 +1,6 @@
-﻿@{
+﻿@model SGBL.Application.ViewModels.UserDashboardViewModel
+
+@{
     ViewData["Title"] = "Mi Dashboard";
     Layout = "~/Views/Shared/_DashboardLayout.cshtml";
 }
@@ -21,8 +23,12 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col">
-                        <h4 class="card-title">¡Bienvenido de vuelta, @ViewData["UserName"]!</h4>
-                        <p class="card-text mb-0">Estamos contentos de verte de nuevo en nuestra biblioteca.</p>
+                        <h4 class="card-title" style="color:black;">
+                            ¡Bienvenido de vuelta, @(Model.UserName ?? (string?)ViewData["UserName"] ?? "Usuario")!
+                        </h4>
+                        <p class="card-text mb-0" style="color:black;">
+                            Estamos contentos de verte de nuevo en nuestra biblioteca.
+                        </p>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-book-reader fa-3x opacity-50"></i>
@@ -35,6 +41,7 @@
 
 <!-- Mis estadísticas -->
 <div class="row mb-4">
+    <!-- Préstamos activos -->
     <div class="col-md-4 mb-4">
         <div class="card border-left-primary shadow h-100">
             <div class="card-body">
@@ -43,9 +50,11 @@
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                             Préstamos Activos
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">3</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            @Model.ActiveLoansCount
+                        </div>
                         <div class="mt-2">
-                            <a href="@Url.Action("MyLoans", "UserDashboard")" class="btn btn-sm btn-outline-primary">
+                            <a href="@Url.Action("Index", "Loan")" class="btn btn-sm btn-outline-primary">
                                 Ver Detalles
                             </a>
                         </div>
@@ -58,6 +67,7 @@
         </div>
     </div>
 
+    <!-- Libros leídos -->
     <div class="col-md-4 mb-4">
         <div class="card border-left-success shadow h-100">
             <div class="card-body">
@@ -66,9 +76,18 @@
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                             Libros Leídos
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">24</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            @Model.ReadBooksCount
+                        </div>
                         <div class="mt-2">
-                            <span class="text-success small">+2 este mes</span>
+                            @if (Model.ReadBooksCount > 0)
+                            {
+                                <span class="text-success small">¡Sigue leyendo! 📚</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">Aún no has terminado ningún libro.</span>
+                            }
                         </div>
                     </div>
                     <div class="col-auto">
@@ -79,6 +98,7 @@
         </div>
     </div>
 
+    <!-- Próxima devolución -->
     <div class="col-md-4 mb-4">
         <div class="card border-left-warning shadow h-100">
             <div class="card-body">
@@ -87,10 +107,29 @@
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             Próxima Devolución
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">2 días</div>
-                        <div class="mt-2">
-                            <span class="text-warning small">"Cien años de soledad"</span>
-                        </div>
+
+                        @if (Model.NextDueInDays.HasValue && !string.IsNullOrEmpty(Model.NextDueBookTitle))
+                        {
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.NextDueInDays día@(Model.NextDueInDays == 1 ? "" : "s")
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-warning small">
+                                    "@Model.NextDueBookTitle"
+                                </span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Sin préstamos próximos
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-muted small">
+                                    No tienes devoluciones pendientes.
+                                </span>
+                            </div>
+                        }
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-clock fa-2x text-gray-300"></i>
@@ -109,26 +148,63 @@
                 <h6 class="m-0 font-weight-bold text-primary">Mis Préstamos Activos</h6>
             </div>
             <div class="card-body">
-                <div class="list-group">
-                    <div class="list-group-item">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">Cien años de soledad</h6>
-                            <small class="text-warning">Vence en 2 días</small>
-                        </div>
-                        <p class="mb-1">Gabriel García Márquez</p>
-                        <small class="text-muted">Prestado: 15 Oct 2024</small>
+                @if (Model.ActiveLoans != null && Model.ActiveLoans.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var loan in Model.ActiveLoans)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">@loan.BookTitle</h6>
+
+                                    @if (loan.DaysRemaining < 0)
+                                    {
+                                        <small class="text-danger">
+                                            Vencido hace @Math.Abs(loan.DaysRemaining) día@(Math.Abs(loan.DaysRemaining) == 1 ? "" : "s")
+                                        </small>
+                                    }
+                                    else if (loan.DaysRemaining == 0)
+                                    {
+                                        <small class="text-danger">
+                                            Vence hoy
+                                        </small>
+                                    }
+                                    else if (loan.DaysRemaining <= 3)
+                                    {
+                                        <small class="text-warning">
+                                            Vence en @loan.DaysRemaining día@(loan.DaysRemaining == 1 ? "" : "s")
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-success">
+                                            Vence en @loan.DaysRemaining día@(loan.DaysRemaining == 1 ? "" : "s")
+                                        </small>
+                                    }
+                                </div>
+                                <p class="mb-1">
+                                    @if (!string.IsNullOrEmpty(loan.AuthorName))
+                                    {
+                                        @loan.AuthorName
+                                    }
+                                </p>
+                                <small class="text-muted">
+                                    Prestado: @loan.DateLoan?.ToString("dd MMM yyyy") |
+                                    Devolución: @loan.DueDate.ToString("dd MMM yyyy")
+                                </small>
+                            </div>
+                        }
                     </div>
-                    <div class="list-group-item">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">El Quijote</h6>
-                            <small class="text-success">Vence en 10 días</small>
-                        </div>
-                        <p class="mb-1">Miguel de Cervantes</p>
-                        <small class="text-muted">Prestado: 20 Oct 2024</small>
-                    </div>
-                </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">
+                        No tienes préstamos activos. ¿Quieres buscar un libro?
+                    </p>
+                }
+
                 <div class="text-center mt-3">
-                    <a href="@Url.Action("MyLoans", "UserDashboard")" class="btn btn-outline-primary btn-sm">
+                    <a href="@Url.Action("Index", "Loan")" class="btn btn-outline-primary btn-sm">
                         Ver Todos Mis Préstamos
                     </a>
                 </div>
@@ -142,6 +218,7 @@
                 <h6 class="m-0 font-weight-bold text-primary">Recomendaciones Para Ti</h6>
             </div>
             <div class="card-body">
+                <!-- Por ahora estático; luego podemos hacerlo dinámico según tus géneros favoritos -->
                 <div class="list-group">
                     <a href="#" class="list-group-item list-group-item-action">
                         <div class="d-flex w-100 justify-content-between">
@@ -168,4 +245,4 @@
             </div>
         </div>
     </div>
-</div>s
+</div>

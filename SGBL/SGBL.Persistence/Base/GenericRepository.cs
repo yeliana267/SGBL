@@ -16,8 +16,7 @@ namespace SGBL.Persistence.Base
             _context = context;
             _dbSet = _context.Set<TEntity>();
             _serviceLogs = serviceLogs;
-            // Si quieres forzar split query global en este repo:
-            // _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
         }
 
         public virtual async Task<TEntity> AddAsync(TEntity entity)

@@ -16,6 +16,12 @@ namespace SGBL.Persistence.Repositories
             _context = context;
             _serviceLogs = serviceLogs;
         }
+
+        public Task<IEnumerable<Book>> GetAvailableBooksAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<(List<Book> Books, int TotalCount)> SearchBooksPagedAsync(
     string? title,
     int? genreId,
@@ -24,7 +30,7 @@ namespace SGBL.Persistence.Repositories
     int pageSize)
         {
             var query = _context.Books
-      .Include(b => b.BookGenre)
+      .Include(b => b.BookGenres)
           .ThenInclude(bg => bg.Genre)
       .Include(b => b.BookAuthors)
           .ThenInclude(ba => ba.Author)
@@ -34,7 +40,7 @@ namespace SGBL.Persistence.Repositories
                 query = query.Where(b => b.Title.Contains(title));
 
             if (genreId.HasValue)
-                query = query.Where(b => b.BookGenre.Any(bg => bg.Genre.Id == genreId.Value));
+                query = query.Where(b => b.BookGenres.Any(bg => bg.Genre.Id == genreId.Value));
 
             if (authorId.HasValue)
                 query = query.Where(b => b.BookAuthors.Any(ba => ba.Author.Id == authorId.Value));

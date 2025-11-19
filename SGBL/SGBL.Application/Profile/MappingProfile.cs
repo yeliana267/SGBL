@@ -34,15 +34,10 @@ namespace SGBL.Application.Profiles
             CreateMap<NotificationStatus, NotificationStatusDto>().ApplyStandardMapping();
             CreateMap<NotificationType, NotificationTypeDto>().ApplyStandardMapping();
             CreateMap<Genre, GenreDto>().ApplyStandardMapping();
-            CreateMap<Loan, LoanDto>().ApplyStandardMapping();
             CreateMap<LoanStatus, LoanStatusDto>().ApplyStandardMapping();
             CreateMap<Book, BookDto>().ApplyStandardMapping();
             CreateMap<Author, AuthorDto>().ApplyStandardMapping();
-           
-
-       
-            
-
+          
 
             CreateMap<Book, BookDto>()
                 .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
@@ -55,6 +50,33 @@ namespace SGBL.Application.Profiles
                 .ForMember(d => d.Ubication, o => o.MapFrom(s => s.Ubication))
                 .ForMember(d => d.StatusId, o => o.MapFrom(s => s.Status));
 
+            CreateMap<Loan, LoanDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.IdBook, opt => opt.MapFrom(src => src.IdBook))
+                .ForMember(dest => dest.IdUser, opt => opt.MapFrom(src => src.IdUser))
+                .ForMember(dest => dest.IdLibrarian, opt => opt.MapFrom(src => src.IdLibrarian))
+                .ForMember(dest => dest.DateLoan, opt => opt.MapFrom(src => src.DateLoan))
+                .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.DueDate))
+                .ForMember(dest => dest.ReturnDate, opt => opt.MapFrom(src => src.ReturnDate))
+                .ForMember(dest => dest.PickupDate, opt => opt.MapFrom(src => src.PickupDate))
+                .ForMember(dest => dest.PickupDeadline, opt => opt.MapFrom(src => src.PickupDeadline))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.FineAmount, opt => opt.MapFrom(src => src.FineAmount))
+                .ForMember(dest => dest.Notes, opt => opt.MapFrom(src => src.Notes))
+                .ForMember(dest => dest.CreationDate, opt => opt.MapFrom(src => src.CreationDate))
+                .ForMember(dest => dest.UpdateDate, opt => opt.MapFrom(src => src.UpdateDate))
+
+                .ForMember(dest => dest.BookTitle,
+                    opt => opt.MapFrom(src => src.Book != null ? src.Book.Title : null))
+                .ForMember(dest => dest.UserName,
+                    opt => opt.MapFrom(src => src.User != null ? src.User.Name : null))
+                .ForMember(dest => dest.LibrarianName,
+                    opt => opt.MapFrom(src => src.Librarian != null ? src.Librarian.Name : null))
+                .ForMember(dest => dest.StatusName,
+                    opt => opt.MapFrom(src => src.LoanStatus != null ? src.LoanStatus.Name : null));
+
+
+
             // Reverse maps con configuración
             CreateMap<RoleDto, Role>().ApplyStandardReverseMapping();
             CreateMap<NationalityDto, Nationality>().ApplyStandardReverseMapping();
@@ -64,16 +86,9 @@ namespace SGBL.Application.Profiles
             CreateMap<NotificationStatusDto, NotificationStatus>().ApplyStandardReverseMapping();
             CreateMap<NotificationTypeDto, NotificationType>().ApplyStandardReverseMapping();
             CreateMap<GenreDto, Genre>().ApplyStandardReverseMapping();
-            CreateMap<LoanDto, Loan>().ApplyStandardReverseMapping();
             CreateMap<LoanStatusDto, LoanStatus>().ApplyStandardReverseMapping();
             CreateMap<BookDto, Book>().ApplyStandardReverseMapping();
             CreateMap<AuthorDto, Author>().ApplyStandardReverseMapping();
-           
-
-
-           
-
-
 
             CreateMap<BookDto, Book>()
                 .ForMember(d => d.Title, o => o.MapFrom(s => s.Title))
@@ -88,7 +103,25 @@ namespace SGBL.Application.Profiles
                 .ForMember(d => d.CreatedAt, o => o.Ignore())
                 .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow));
 
+            CreateMap<LoanDto, Loan>()
+    .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+    .ForMember(dest => dest.IdBook, opt => opt.MapFrom(src => src.IdBook))
+    .ForMember(dest => dest.IdUser, opt => opt.MapFrom(src => src.IdUser))
+    .ForMember(dest => dest.IdLibrarian, opt => opt.MapFrom(src => src.IdLibrarian))
+    .ForMember(dest => dest.DateLoan, opt => opt.MapFrom(src => src.DateLoan))
+    .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.DueDate))
+    .ForMember(dest => dest.ReturnDate, opt => opt.MapFrom(src => src.ReturnDate))
+    .ForMember(dest => dest.PickupDate, opt => opt.MapFrom(src => src.PickupDate))
+    .ForMember(dest => dest.PickupDeadline, opt => opt.MapFrom(src => src.PickupDeadline))
+    .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+    .ForMember(dest => dest.FineAmount, opt => opt.MapFrom(src => src.FineAmount))
+    .ForMember(dest => dest.Notes, opt => opt.MapFrom(src => src.Notes))
+    .ForMember(dest => dest.CreationDate, opt => opt.MapFrom(src => src.CreationDate))
+    .ForMember(dest => dest.UpdateDate, opt => opt.MapFrom(src => src.UpdateDate));
+
+
         }
+
 
 
         private void ApplyCustomMappings()
@@ -100,6 +133,8 @@ namespace SGBL.Application.Profiles
             CreateMap<UserDto, User>()
                 .ApplyStandardReverseMapping()
                 .IgnoreSensitiveProperties();
+            CreateMap<LoanDto, LoanViewModel>()
+       .ReverseMap();
         }
     }
 

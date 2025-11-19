@@ -11,27 +11,40 @@ namespace SGBL.Domain.Entities
         [Column("idlibro")]
         [Key]
         public override int Id { get; set; }
+
         [Column("titulo")]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
+
         [Column("isbn")]
         public long Isbn { get; set; }
+
         [Column("descripcion")]
-        public string Description { get; set; }
+        public string? Description { get; set; } // Probablemente nullable
+
         [Column("año_publicacion")]
         public int PublicationYear { get; set; }
+
         [Column("paginas")]
         public int Pages { get; set; }
+
         [Column("copias_total")]
-        public int  TotalCopies {  get; set; }
+        public int TotalCopies { get; set; }
+
         [Column("copias_disponibles")]
         public int AvailableCopies { get; set; }
+
         [Column("ubicacion")]
-        public string Ubication { get; set; }
+        public string Ubication { get; set; } = string.Empty;
+
         [Column("estado")]
         public int Status { get; set; }
+
+        // Relación con estado
+        [ForeignKey("Status")]
+        public virtual BookStatus BookStatus { get; set; } = null!;
+
         public virtual ICollection<BookAuthor> BookAuthors { get; set; } = new List<BookAuthor>();
-        public virtual ICollection<BookGenre> BookGenre { get; set; } = new List<BookGenre>();
-
-
+        public virtual ICollection<BookGenre> BookGenres { get; set; } = new List<BookGenre>(); // Cambié el nombre por consistencia
     }
+
 }

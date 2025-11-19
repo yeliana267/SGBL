@@ -1,5 +1,4 @@
-﻿
-namespace SGBL.Application.Dtos.Book
+﻿namespace SGBL.Application.Dtos.Book
 {
     public class BookStatusDto : BaseAuditableDto<int>
     {
