@@ -179,6 +179,40 @@ namespace SGBL.Web.Controllers
             return View(model);
         }
         */
+
+        public async Task<IActionResult> Create(int? bookId)
+        {
+            SetLayoutUserData();
+            await LoadDropdowns();
+
+            var model = new LoanViewModel()
+            {
+                PickupDeadline = DateTime.Now.AddDays(DefaultPickupDays),
+                DueDate = DateTime.Now.AddDays(DefaultLoanDays),
+                Status = 1 // Pendiente por defecto
+            };
+
+            var currentUserId = GetCurrentUserId();
+
+            // 👤 Si es usuario normal (rol 9) → forzamos su propio IdUser
+            if (User.IsInRole("9") && currentUserId != null)
+            {
+                model.IdUser = currentUserId.Value;
+
+                ViewBag.CurrentUserId = currentUserId.Value;
+                ViewBag.CurrentUserName = CurrentUserName;
+            }
+
+            // 📚 Si viene bookId desde "Tomar prestado"
+            if (bookId.HasValue)
+            {
+                model.IdBook = bookId.Value;
+                ViewBag.PreSelectedBookId = bookId.Value;
+            }
+
+            return View(model);
+        }
+
         public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10)
         {
             try
