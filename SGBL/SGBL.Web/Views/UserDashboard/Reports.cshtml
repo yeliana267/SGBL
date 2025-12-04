@@ -1,0 +1,143 @@
+﻿@model SGBL.Application.ViewModels.UserReportViewModel
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center pb-2 mb-4 border-bottom">
+        <div>
+            <h1 class="h3 mb-0"><i class="fas fa-chart-pie text-primary me-2"></i>Mis reportes</h1>
+            <small class="text-muted">Resumen personal de lectura y préstamos</small>
+        </div>
+        <span class="badge bg-info text-dark">Usuario</span>
+    </div>
+
+    <div class="row g-3 mb-4">
+        @foreach (var card in Model.SummaryCards)
+        {
+            <div class="col-xl-3 col-md-6">
+                <div class="card shadow-sm h-100 border-start border-4 border-@card.ColorClass">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="text-muted text-uppercase mb-1 small">@card.Title</p>
+                                <h4 class="mb-0 fw-bold">@card.Value</h4>
+                                <small class="text-muted">@card.Description</small>
+                            </div>
+                            <div class="text-@card.ColorClass">
+                                <i class="fas @card.Icon fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">Préstamos activos</h5>
+                        <small class="text-muted">Libros que debes devolver</small>
+                    </div>
+                    <i class="fas fa-book-reader text-primary"></i>
+                </div>
+                <div class="card-body">
+                    @if (Model.ActiveLoans.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var loan in Model.ActiveLoans)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@loan.Title</strong>
+                                        <div class="text-muted small">@loan.Subtitle</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div>@loan.Value</div>
+                                        <span class="badge @loan.BadgeClass">@loan.BadgeText</span>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success mb-0">No tienes préstamos pendientes.</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">Actividad mensual</h5>
+                        <small class="text-muted">Préstamos iniciados por mes</small>
+                    </div>
+                    <i class="fas fa-chart-column text-info"></i>
+                </div>
+                <div class="card-body">
+                    @if (Model.MonthlyActivity.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0 align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Mes</th>
+                                        <th class="text-end">Préstamos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.MonthlyActivity)
+                                    {
+                                        <tr>
+                                            <td>@item.Label</td>
+                                            <td class="text-end fw-semibold">@item.Count</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-light mb-0">Aún no registras actividad.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">Próxima devolución</h5>
+                <small class="text-muted">Mantente al día con tus entregas</small>
+            </div>
+            <i class="fas fa-clock text-warning"></i>
+        </div>
+        <div class="card-body">
+            @if (Model.NextReturn is not null)
+            {
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">@Model.NextReturn.Title</h6>
+                        <div class="text-muted">@Model.NextReturn.Subtitle</div>
+                    </div>
+                    <div class="text-end">
+                        <div>@Model.NextReturn.Value</div>
+                        <span class="badge @Model.NextReturn.BadgeClass">@Model.NextReturn.BadgeText</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success mb-0">No tienes entregas pendientes.</div>
+            }
+        </div>
+    </div>
+</div>

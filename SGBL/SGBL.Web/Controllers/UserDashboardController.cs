@@ -276,6 +276,110 @@ namespace SGBL.Web.Controllers
             return RedirectToAction("Index", "Loan");
         }
 
+        // GET: /UserDashboard/Reports
+        [HttpGet]
+        public async Task<IActionResult> Reports()
+        {
+            LogAction("Accedió a sus reportes de lectura");
+
+            ViewData["Title"] = "Mis reportes";
+            ViewData["UserRole"] = CurrentUserRoleName;
+            ViewData["UserName"] = CurrentUserName;
+            ViewData["UserEmail"] = CurrentUserEmail;
+
+            var userId = GetCurrentUserId();
+            var loans = (await _loanService.GetLoansByUserAsync(userId)).ToList();
+
+            var today = DateTime.UtcNow.Date;
+            var startOfMonth = new DateTime(today.Year, today.Month, 1);
+
+            var activeLoans = loans
+                .Where(l => l.ReturnDate == null)
+                .OrderBy(l => l.DueDate)
+                .ToList();
+
+            var monthlyActivity = Enumerable.Range(0, 6)
+                .Select(offset =>
+                {
+                    var monthStart = startOfMonth.AddMonths(-offset);
+                    var monthEnd = monthStart.AddMonths(1);
+                    return new MonthlyReportItemViewModel
+                    {
+                        Label = monthStart.ToString("MMM yyyy"),
+                        Count = loans.Count(l => l.DateLoan.HasValue && l.DateLoan.Value >= monthStart && l.DateLoan.Value < monthEnd)
+                    };
+                })
+                .Reverse()
+                .ToList();
+
+            var nextReturn = activeLoans.FirstOrDefault();
+
+            var model = new UserReportViewModel
+            {
+                SummaryCards = new List<ReportCountCardViewModel>
+                {
+                    new()
+                    {
+                        Title = "Préstamos totales",
+                        Value = loans.Count.ToString(),
+                        Icon = "fa-layer-group",
+                        ColorClass = "primary",
+                        Description = "Historial completo de préstamos"
+                    },
+                    new()
+                    {
+                        Title = "Activos",
+                        Value = activeLoans.Count.ToString(),
+                        Icon = "fa-hourglass-half",
+                        ColorClass = "info",
+                        Description = "Pendientes de devolución"
+                    },
+                    new()
+                    {
+                        Title = "Devueltos",
+                        Value = loans.Count(l => l.ReturnDate != null || l.Status == 3).ToString(),
+                        Icon = "fa-check-circle",
+                        ColorClass = "success",
+                        Description = "Libros entregados"
+                    },
+                    new()
+                    {
+                        Title = "Atrasados",
+                        Value = loans.Count(l => l.ReturnDate == null && l.DueDate.Date < today).ToString(),
+                        Icon = "fa-exclamation-triangle",
+                        ColorClass = "danger",
+                        Description = "Requieren atención inmediata"
+                    }
+                },
+                ActiveLoans = activeLoans.Select(l => new ReportListItemViewModel
+                {
+                    Title = l.BookTitle ?? $"Libro #{l.IdBook}",
+                    Subtitle = $"Vence: {l.DueDate:dd MMM yyyy}",
+                    Value = l.DueDate.Date < today
+                        ? $"Atraso: {(today - l.DueDate.Date).Days} días"
+                        : $"Faltan {(l.DueDate.Date - today).Days} días",
+                    BadgeClass = l.DueDate.Date < today ? "bg-danger" : "bg-primary",
+                    BadgeText = l.DueDate.Date < today ? "Atrasado" : "En curso"
+                }).ToList(),
+                MonthlyActivity = monthlyActivity,
+                NextReturn = nextReturn != null
+                    ? new ReportListItemViewModel
+                    {
+                        Title = nextReturn.BookTitle ?? $"Libro #{nextReturn.IdBook}",
+                        Subtitle = $"Vence el {nextReturn.DueDate:dd MMM yyyy}",
+                        Value = nextReturn.DueDate.Date < today
+                            ? $"Atrasado por {(today - nextReturn.DueDate.Date).Days} días"
+                            : $"Faltan {(nextReturn.DueDate.Date - today).Days} días",
+                        BadgeClass = nextReturn.DueDate.Date < today ? "bg-danger" : "bg-success",
+                        BadgeText = nextReturn.DueDate.Date < today ? "Pendiente" : "A tiempo"
+                    }
+                    : null
+            };
+
+            return View(model);
+        }
+
+
         private static BookViewModel MapToVm(BookDto dto) => new()
         {
             Id = dto.Id,

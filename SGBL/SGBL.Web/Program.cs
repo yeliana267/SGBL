@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SGBL.Application;
 using SGBL.Persistence;
 using SGBL.Persistence.Context;
+using SGBL.Web.Services;
 using System.Security.Claims;
 
 namespace SGBL.Web
@@ -15,6 +16,7 @@ namespace SGBL.Web
 
             var config = builder.Configuration;
             var connectionString = config.GetConnectionString("SupabaseConnection");
+            builder.Services.AddHostedService<LoanNotificationBackgroundService>();
 
             //  SERVICIOS MVC Y API
             builder.Services.AddControllersWithViews();

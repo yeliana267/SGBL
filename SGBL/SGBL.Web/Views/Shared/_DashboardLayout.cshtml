@@ -198,8 +198,11 @@
                                href="@Url.Action("Dashboard", "Admin")">
                                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                             </a>
-           
-                           
+
+                            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")"
+                               href="@Url.Action("Reports", "Admin")">
+                                <i class="fas fa-chart-line me-2"></i>Reportes
+                            </a>
                         }
                         else if (ViewData["UserRole"]?.ToString() == "Usuario")
                         {
@@ -214,6 +217,10 @@
                             <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
                                href="@Url.Action("Index", "Loan")">
                                 <i class="fas fa-list me-2"></i>Mis Préstamos
+                            </a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")"
+                               href="@Url.Action("Reports", "UserDashboard")">
+                                <i class="fas fa-chart-pie me-2"></i>Mis reportes
                             </a>
                             <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")"
                                href="@Url.Action("Profile", "UserDashboard")">
@@ -230,6 +237,11 @@
                             <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
                                href="@Url.Action("Index", "Loan")">
                                 <i class="fas fa-exchange-alt me-2"></i>Gestión Préstamos
+                            </a>
+
+                            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")"
+                               href="@Url.Action("Reports", "Bibliotecario")">
+                                <i class="fas fa-chart-bar me-2"></i>Reportes
                             </a>
                          
                         }

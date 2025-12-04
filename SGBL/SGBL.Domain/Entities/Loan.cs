@@ -66,5 +66,15 @@ namespace SGBL.Domain.Entities
 
         [ForeignKey("Status")]
         public virtual LoanStatus? LoanStatus { get; set; }
+
+        [Column("reminderthreedayssent")]
+        public bool ReminderThreeDaysSent { get; set; }
+
+        [Column("reminderduedatesent")]
+        public bool ReminderDueDateSent { get; set; }
+
+        [Column("lastfineemailsentutc")]
+        public DateTime? LastFineEmailSentUtc { get; set; }
+
     }
 }

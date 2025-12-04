@@ -26,6 +26,8 @@ namespace SGBL.Application
             services.AddScoped<IGenreService, GenreService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAuthorService, AuthorService>();
+            services.AddScoped<ILoanNotificationService, LoanNotificationService>();
+
 
 
 

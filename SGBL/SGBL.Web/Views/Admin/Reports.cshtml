@@ -1,0 +1,143 @@
+﻿@model SGBL.Application.ViewModels.AdminReportViewModel
+@using System.Linq
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    var viewModel = Model ?? new SGBL.Application.ViewModels.AdminReportViewModel();
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center pb-2 mb-4 border-bottom">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-chart-line text-primary me-2"></i>Reportes del sistema
+            </h1>
+            <small class="text-muted">Resumen ejecutivo para administración</small>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-primary">Administrador</span>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        @foreach (var card in viewModel.SummaryCards)
+        {
+            <div class="col-xl-3 col-md-6">
+                <div class="card shadow-sm h-100 border-start border-4 border-@card.ColorClass">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="text-muted text-uppercase mb-1 small">@card.Title</p>
+                                <h4 class="mb-0 fw-bold">@card.Value</h4>
+                                <small class="text-muted">@card.Description</small>
+                            </div>
+                            <div class="text-@card.ColorClass">
+                                <i class="fas @card.Icon fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Actividad de préstamos</h5>
+                            <small class="text-muted">Estado global de los movimientos</small>
+                        </div>
+                        <span class="badge bg-light text-dark">@viewModel.MonthlyLoans movimientos</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="h4 text-primary mb-0">@viewModel.ActiveLoans</div>
+                            <small class="text-muted">Préstamos activos</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="h4 text-danger mb-0">@viewModel.OverdueLoans</div>
+                            <small class="text-muted">Con atraso</small>
+                        </div>
+                        <div class="col-12">
+                            <div class="h4 text-success mb-0">@viewModel.ReturnedThisMonth</div>
+                            <small class="text-muted">Devueltos este mes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="mb-0">Distribución de roles</h5>
+                    <small class="text-muted">Usuarios por tipo de acceso</small>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        @foreach (var role in viewModel.RoleBreakdown)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@role.Title</strong>
+                                    <div class="text-muted small">@role.Subtitle</div>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">@role.Value</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">Libros con mayor rotación</h5>
+                <small class="text-muted">Top 5 títulos más solicitados</small>
+            </div>
+            <i class="fas fa-book-open text-primary"></i>
+        </div>
+        <div class="card-body">
+            @if (viewModel.TopBooks.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Préstamos</th>
+                                <th>Detalle mensual</th>
+                                <th class="text-end">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in viewModel.TopBooks)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.Title</td>
+                                    <td>@item.Value</td>
+                                    <td class="text-muted">@item.Subtitle</td>
+                                    <td class="text-end">
+                                        <span class="badge @item.BadgeClass">@item.BadgeText</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    No hay movimientos registrados aún para mostrar.
+                </div>
+            }
+        </div>
+    </div>
+</div>
